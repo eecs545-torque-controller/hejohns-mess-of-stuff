@@ -18,7 +18,7 @@ import config
 import load
 
 class LSTMModel(nn.Module):
-    def __init__(self, hidden_size=512, num_layers=2):
+    def __init__(self, hidden_size=512, num_layers=1):
         super().__init__()
         self.input_size = len(config.sensor_list)
         self.hidden_size = hidden_size
@@ -71,24 +71,27 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
     #subjects = [f for f in os.listdir('.') if re.search("AB\d+", f)]
-    subjects = ['AB02', 'AB03']
+    subjects = ['AB02']
     #activities = re.compile(".");
-    activities = re.compile(".");
+    activities = re.compile("normal_walk");
     print(f"initializing training dataset... {curtime()}")
     training_data = load.GreedyLSTMDataset(subjects, activities)
     print(f"initializing test dataset... {curtime()}")
     test_data = load.GreedyLSTMDataset(['AB01'], activities)
     # I'm pretty sure prefetching is useless if we're doing CPU training
+    # or the disk IO is really slow
     # I'm just using num_workers=2 so we can set persistent_workers=True
-    train_dataloader = torch.utils.data.DataLoader(training_data, shuffle=True, batch_size=config.batch_size, num_workers=2, persistent_workers=True)
-    test_dataloader = torch.utils.data.DataLoader(test_data, shuffle=True, batch_size=config.batch_size, num_workers=2, persistent_workers=True)
+    #train_dataloader = torch.utils.data.DataLoader(training_data, shuffle=True, batch_size=config.batch_size, num_workers=4, persistent_workers=True)
+    #test_dataloader = torch.utils.data.DataLoader(test_data, shuffle=True, batch_size=config.batch_size, num_workers=4, persistent_workers=True)
+    train_dataloader = torch.utils.data.DataLoader(training_data, shuffle=True, batch_size=config.batch_size)
+    test_dataloader = torch.utils.data.DataLoader(test_data, shuffle=True, batch_size=config.batch_size)
 
     if os.path.isfile(checkpoint_path) and len(sys.argv) > 1:
         checkpoint = torch.load(checkpoint_path)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         start_epoch = checkpoint['epoch']
-        loss = checkpoint['loss']
+        #loss = checkpoint['loss']
         print(f"Checkpoint loaded. Resuming training from epoch {start_epoch}")
     else:
         start_epoch = 0
@@ -103,10 +106,11 @@ if __name__ == '__main__':
         sloss = 0.0
         snb = 0
         for X_batch, y_batch in train_dataloader:
-            #print(f"before batch {curtime()}")
             #with record_function("forward"):
             y_pred = model(X_batch)
+            assert not y_pred.isnan().any()
             loss = loss_fn(y_pred, y_batch)
+            assert not loss.isnan().any()
             sloss += loss.item() * X_batch.size()[0]
             snb += 1
             optimizer.zero_grad()
@@ -123,21 +127,34 @@ if __name__ == '__main__':
             'optimizer_state_dict': optimizer.state_dict(),
             #'loss': loss
             }, checkpoint_path)
-        if epoch % 100 == 0: # only eval every n epochs
+        if True: # only eval every n epochs
+        #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
                 total_training_loss = 0.0
                 num_training_batches = 0
                 for X_batch, y_batch in train_dataloader:
                     y_pred = model(X_batch)
+                    assert not y_pred.isnan().any()
                     batch_loss = loss_fn(y_pred, y_batch)
+                    assert not batch_loss.isnan().any()
                     total_training_loss += batch_loss.item()
                     num_training_batches += 1
                 total_test_loss = 0.0
                 num_test_batches = 0
                 for X_batch, y_batch in test_dataloader:
                     y_pred = model(X_batch)
+                    assert not y_pred.isnan().any()
                     batch_loss = loss_fn(y_pred, y_batch)
+                    print()
+                    try:
+                        assert not y_batch.isnan().any()
+                    except AssertionError:
+                        torch.set_printoptions(profile="full")
+                        #print(X_batch)
+                        print(y_batch)
+                        torch.set_printoptions(profile="default")
+                    assert not batch_loss.isnan().any()
                     total_test_loss += batch_loss.item()
                     num_test_batches += 1
                 #train_rmse = np.sqrt(loss_fn(y_pred, y_train))
@@ -150,18 +167,22 @@ if __name__ == '__main__':
                 num_training_batches = 0
                 for X_batch, y_batch in train_dataloader:
                     y_pred = model(X_batch)
+                    assert not y_pred.isnan().any()
                     y_pred = y_pred[:, -1, :]
                     y_batch = y_batch[:, -1, :]
                     batch_loss = loss_fn(y_pred, y_batch)
+                    assert not batch_loss.isnan().any()
                     total_training_loss += batch_loss.item()
                     num_training_batches += 1
                 total_test_loss = 0.0
                 num_test_batches = 0
                 for X_batch, y_batch in test_dataloader:
                     y_pred = model(X_batch)
+                    assert not y_pred.isnan().any()
                     y_pred = y_pred[:, -1, :]
                     y_batch = y_batch[:, -1, :]
                     batch_loss = loss_fn(y_pred, y_batch)
+                    assert not batch_loss.isnan().any()
                     total_test_loss += batch_loss.item()
                     num_test_batches += 1
                 #train_rmse = np.sqrt(loss_fn(y_pred, y_train))

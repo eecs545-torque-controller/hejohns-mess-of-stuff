@@ -216,6 +216,14 @@ class GreedyLSTMDataset(Dataset):
                     # pytorch largely expects float32, not float64 which seems to be the numpy default
                     sample_t = torch.tensor(sample_df.to_numpy(dtype=np.float32))
                     label_t = torch.tensor(label_df.to_numpy(dtype=np.float32))
+                    if label_t.isnan().any():
+                        torch.set_printoptions(profile="full")
+                        print(s)
+                        print(a)
+                        print(idx - acc)
+                        print(window)
+                        torch.set_printoptions(profile="default")
+                        assert False
                     return sample_t, label_t
                 else:
                     acc += self.preprocessed_data[s][a][1]
