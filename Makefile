@@ -15,5 +15,5 @@ ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
 
 clean:
-	-find . -type d -name 'AB[0-9]*' -delete
+	find . -maxdepth 0 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
 .PHONY: default clean
