@@ -18,4 +18,4 @@ with open(sys.argv[2], 'wb') as g:
                 if dg.isnull().values.any():
                     continue
                 else:
-                    pickle.dump(dg, f)
+                    pickle.dump(dg, g)
