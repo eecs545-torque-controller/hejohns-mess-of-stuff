@@ -18,7 +18,7 @@ default: ProcessedData.zip
 	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
 $(GUD): default
-	$(PYTHON3) pickle_data.py preprocessed_data > $@
+	$(PYTHON3) pickle_data.py preprocessed_data.csv > $@
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
