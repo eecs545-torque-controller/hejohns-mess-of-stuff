@@ -3,7 +3,7 @@ import pickle
 import sys
 import numpy as np
 
-assert len(sys.argv) == 2
+assert len(sys.argv) == 3
 grandUnifiedData = pickle.load(sys.argv[1])
 windowedData = []
 # let's hope that keeping grandUnifiedData in memory isn't an issue
