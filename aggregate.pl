@@ -15,12 +15,12 @@ my $ncpus;
 chomp($ncpus = `nproc`);
 $ncpus /= 4;
 my $parallel = Parallel::Loops->new($ncpus);
-my @subjects = sort grep {/^AB\d+$/} read_dir('.');
+my @subjects = sort(grep {/^AB\d+$/} read_dir(curdir()));
 $parallel->foreach(\@subjects, sub {
     my $s = $_;
-    my @activities = sort read_dir(catdir(curdir(), $s));
+    my @activities = sort(read_dir(catdir(curdir(), $s)));
     for my $a (@activities){
-        my @data = sort grep {/(activity_flag|moment_filt|angle|emg_downsampled|imu_real|velocity)\.csv$/} read_dir(catdir(curdir(), $s, $a));
+        my @data = sort(grep {/(activity_flag|moment_filt|angle|emg_downsampled|imu_real|velocity)\.csv$/} read_dir(catdir(curdir(), $s, $a)));
         @data = map {catfile(curdir(), $s, $a, $_)} @data;
         my @activity = grep {/activity_flag\.csv$/} @data;
         assert(@activity == 1);
