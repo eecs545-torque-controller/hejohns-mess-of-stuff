@@ -26,7 +26,7 @@ $parallel->foreach(\@subjects, sub {
         if(!-e catfile(curdir(), $s, $a, $ARGV[2])){
             run ['python3', $ARGV[0], catfile(curdir(), $s, $a, $data[1])],
                 '>', catfile(curdir(), $s, $a, $ARGV[2])
-                or die "$python_script failed!";
+                or die "$ARGV[0] failed!";
         }
     }
 });
