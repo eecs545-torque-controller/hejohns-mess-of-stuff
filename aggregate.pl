@@ -27,6 +27,6 @@ $parallel->foreach(\@subjects, sub {
         assert(defined($ARGV[0])):
         run ['python3', $python_script, @activity, @data_without_activity],
             '>', catfile(curdir(), $s, $a, $ARGV[0])
-            or croak "$python_script failed!";
+            or die "$python_script failed!";
     }
 });
