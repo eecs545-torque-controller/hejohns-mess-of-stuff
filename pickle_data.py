@@ -13,7 +13,7 @@ grandUnifiedData = {}
 activities = {}
 for s in subjects:
     grandUnifiedData[s] = {}
-    activities[s] = [f for f in os.listdir(os.path.join(os.getcwd, s)) if activities_re.search(f)]
+    activities[s] = [f for f in os.listdir(os.path.join(os.getcwd(), s)) if activities_re.search(f)]
     for a in activities[s]:
         leaf = os.path.join(os.getcwd(), s, a, sys.argv[1])
         assert os.path.isfile(leaf)
