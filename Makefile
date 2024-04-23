@@ -9,9 +9,11 @@ default: ProcessedData.zip
 	$(PERL) -e '`unzip $^` if !grep {/^AB\d+$$/} read_dir(curdir())'
 	# preprocess the data
 	## downsample emg data
-	$(PERL) emg_downsample.pl emg_downsampled.csv
+	$(PERL) foreach.pl emg_downsample.py emg emg_downsampled.csv
 	## aggregate the sensor data for each subject and activity
 	$(PERL) aggregate.pl aggregate.csv
+	## filter for rows where at least one of left or right is active
+	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
