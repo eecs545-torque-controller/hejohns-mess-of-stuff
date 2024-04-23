@@ -14,7 +14,7 @@ use IPC::Run qw(run);
 my $ncpus;
 chomp($ncpus = `nproc`);
 $ncpus /= 4;
-assert(@ARGV > 3, "$0 scriptname sensorfile outputfile");
+assert(@ARGV == 3, "$0 scriptname sensorfile outputfile");
 my $parallel = Parallel::Loops->new($ncpus);
 my @subjects = sort(grep {/^AB\d+$/} read_dir(curdir()));
 $parallel->foreach(\@subjects, sub {
