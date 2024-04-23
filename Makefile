@@ -20,7 +20,7 @@ default: ProcessedData.zip
 	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
 $(GUD): default
-	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
+	[ -e $@ ] || $(PYTHON3) pickle_data.py preprocessed_data.csv $@
 	ls --human-readable --size $@
 
 ProcessedData.zip:
