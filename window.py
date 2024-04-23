@@ -4,7 +4,8 @@ import sys
 import numpy as np
 
 assert len(sys.argv) == 3
-grandUnifiedData = pickle.load(sys.argv[1])
+with open(sys.argv[1], 'rb') as f:
+    grandUnifiedData = pickle.load(f)
 windowedData = []
 # let's hope that keeping grandUnifiedData in memory isn't an issue
 for s, v in grandUnifiedData.items():
