@@ -3,11 +3,12 @@
 PERL = perl -Mv5.32 -Mutf8 -Mstrict -Mwarnings '-MFile::Slurp qw(read_dir)' -MFile::Spec::Functions
 PYTHON3 = python3
 
+# a pickle of all the data, for storage in memory during training
 GUD = GrandUnifiedData.pickle
 
+# ideally these would be separate targets but...
 default: ProcessedData.zip
 	# unzip data if it looks like it hasn't been
-	## in the ideal case this would be a target, but...
 	$(PERL) -e '`unzip $^` if !grep {/^AB\d+$$/} read_dir(curdir())'
 	# preprocess the data
 	## downsample emg data
