@@ -6,7 +6,7 @@ import os
 import pickle
 import re
 
-assert len(sys.argv) == 2
+assert len(sys.argv) == 3
 subjects = [f for f in os.listdir(os.getcwd()) if re.search("^AB\d+$", f)]
 activities_re = re.compile(".")
 grandUnifiedData = {}
@@ -19,4 +19,4 @@ for s in subjects:
         assert os.path.isfile(leaf)
         df = pandas.read_csv(leaf, index_col="time")
         grandUnifiedData[s][a] = df
-pickle.dump(grandUnifiedData, sys.stdout)
+pickle.dump(grandUnifiedData, sys.argv[2])
