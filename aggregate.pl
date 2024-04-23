@@ -23,7 +23,7 @@ $parallel->foreach(\@subjects, sub {
         my @sensors = qw(activity_flag moment_filt angle emg_downsampled imu_real velocity);
         my $sensor_re = join '|', @sensors;
         my @data = sort(grep {/($sensor_re)\.csv$/} read_dir(catdir(curdir(), $s, $a)));
-        assert(@sensors == @data); # make sure we got all the sensor data
+        assert(@sensors == @data, "missing sensor data! Expected @sensors, got @data");
         @data = map {catfile(curdir(), $s, $a, $_)} @data;
         my @activity = grep {/activity_flag\.csv$/} @data;
         assert(@activity == 1);
