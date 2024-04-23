@@ -22,7 +22,7 @@ $parallel->foreach(\@subjects, sub {
         my @activity = grep {/activity_flag\.csv$/} @data;
         assert(@activity == 1);
         my @data_without_activity = grep {!/\Q$activity[0]\E/} @data;
-        $python_script = $0;
+        my $python_script = $0;
         $python_script =~ s/\.\S+$/.py/;
         assert(defined($ARGV[0])):
         run ['python3', $python_script, @activity, @data_without_activity],
