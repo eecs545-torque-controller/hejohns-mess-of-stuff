@@ -5,6 +5,7 @@ PYTHON3 = python3
 
 # a pickle of all the data, for storage in memory during training
 GUD = GrandUnifiedData.pickle
+WD = WindowedData.pickle
 
 # ideally these would be separate targets but...
 default: ProcessedData.zip
@@ -24,6 +25,9 @@ $(GUD): default
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
+
+$(WD): $(GUD)
+	$(PYTHON3) window.py $< $@
 
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
