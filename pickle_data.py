@@ -4,6 +4,7 @@ import pandas
 import sys
 import os
 import pickle
+import re
 
 assert len(sys.argv) == 2
 subjects = [f for f in os.listdir(os.getcwd()) if re.search("^AB\d+$", f)]
