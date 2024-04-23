@@ -26,7 +26,7 @@ $parallel->foreach(\@subjects, sub {
         $python_script =~ s/\.\S+$/.py/;
         assert(defined($ARGV[0]), "$0 requires output filename argument");
         if(!-e catfile(curdir(), $s, $a, $ARGV[0])){
-            run ['python3', $python_script, catfile(curdir(), $s, $a, )],
+            run ['python3', $python_script, catfile(curdir(), $s, $a, $data[0])],
                 '>', catfile(curdir(), $s, $a, $ARGV[0])
                 or die "$python_script failed!";
         }
