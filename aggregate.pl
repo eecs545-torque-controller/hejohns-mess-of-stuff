@@ -26,11 +26,11 @@ $parallel->foreach(\@subjects, sub {
         assert(@sensors == @data, "missing sensor data! Expected @sensors, got @data");
         @data = map {catfile(curdir(), $s, $a, $_)} @data;
         my @activity = grep {/activity_flag\.csv$/} @data;
-        assert(@activity == 1);
+        assert(@activity == 1, "should only be one activity_flag.csv file");
         my @data_without_activity = grep {!/\Q$activity[0]\E/} @data;
         my $python_script = $0;
         $python_script =~ s/\.\S+$/.py/;
-        assert(defined($ARGV[0]));
+        assert(defined($ARGV[0]), "$0 requires output filename argument");
         if(!-e catfile(curdir(), $s, $a, $ARGV[0])){
             run ['python3', $python_script, @activity, @data_without_activity],
                 '>', catfile(curdir(), $s, $a, $ARGV[0])
