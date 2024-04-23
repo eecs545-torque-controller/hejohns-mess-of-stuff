@@ -19,4 +19,5 @@ for s in subjects:
         assert os.path.isfile(leaf)
         df = pandas.read_csv(leaf, index_col="time")
         grandUnifiedData[s][a] = df
-pickle.dump(grandUnifiedData, sys.argv[2])
+with open(sys.argv[2], 'wb') as f
+    pickle.dump(grandUnifiedData, f)
