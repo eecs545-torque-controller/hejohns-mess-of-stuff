@@ -11,7 +11,8 @@ use Carp::Assert;
 use Parallel::Loops;
 use IPC::Run qw(run);
 
-my chomp($ncpus = `nproc`);
+my $ncpus;
+chomp($ncpus = `nproc`);
 $ncpus /= 4;
 my $parallel = Parallel::Loops->new($ncpus);
 my @subjects = sort grep {/^AB\d+$/} read_dir('.');
