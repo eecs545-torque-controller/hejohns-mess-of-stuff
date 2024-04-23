@@ -20,6 +20,7 @@ default: ProcessedData.zip
 
 $(GUD): default
 	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
+	ls --human-readable --size $@
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
