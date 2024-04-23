@@ -28,8 +28,10 @@ $parallel->foreach(\@subjects, sub {
         my $python_script = $0;
         $python_script =~ s/\.\S+$/.py/;
         assert(defined($ARGV[0]));
-        run ['python3', $python_script, @activity, @data_without_activity],
-            '>', catfile(curdir(), $s, $a, $ARGV[0])
-            or die "$python_script failed!";
+        if(!-e catfile(curdir(), $s, $a, $ARGV[0])){
+            run ['python3', $python_script, @activity, @data_without_activity],
+                '>', catfile(curdir(), $s, $a, $ARGV[0])
+                or die "$python_script failed!";
+        }
     }
 });
