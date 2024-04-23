@@ -3,6 +3,8 @@ import pickle
 import sys
 import numpy as np
 
+from config import *
+
 assert len(sys.argv) == 3
 with open(sys.argv[1], 'rb') as f:
     grandUnifiedData = pickle.load(f)
