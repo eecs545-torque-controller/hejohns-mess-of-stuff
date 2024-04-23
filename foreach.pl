@@ -24,7 +24,7 @@ $parallel->foreach(\@subjects, sub {
         my @data = sort(grep {/\Q$ARGV[1]\E\.csv$/} File::Slurp::read_dir(catdir(curdir(), $s, $a)));
         assert(@data == 1, "Trying to get $ARGV[1], but got @data");
         if(!-e catfile(curdir(), $s, $a, $ARGV[2])){
-            run ['python3', $ARGV[0], catfile(curdir(), $s, $a, $data[1])],
+            run ['python3', $ARGV[0], catfile(curdir(), $s, $a, $data[0])],
                 '>', catfile(curdir(), $s, $a, $ARGV[2])
                 or die "$ARGV[0] failed!";
         }
