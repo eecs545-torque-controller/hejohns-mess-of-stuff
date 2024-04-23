@@ -8,6 +8,8 @@ default: ProcessedData.zip
 	## in the ideal case this would be a target, but...
 	$(PERL) -e '`unzip $^` if !grep {/^AB\d+$$/} read_dir(".")'
 	# preprocess the data
+	### downsample emg data
+	#$(PERL) aggregate.pl emg_downsampled.csv
 	## aggregate the sensor data for each subject and activity
 	$(PERL) aggregate.pl aggregate.csv
 

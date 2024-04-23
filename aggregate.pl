@@ -20,7 +20,10 @@ $parallel->foreach(\@subjects, sub {
     my $s = $_;
     my @activities = sort(read_dir(catdir(curdir(), $s)));
     for my $a (@activities){
-        my @data = sort(grep {/(activity_flag|moment_filt|angle|emg_downsampled|imu_real|velocity)\.csv$/} read_dir(catdir(curdir(), $s, $a)));
+        my @sensors = qw(activity_flag moment_filt angle emg_downsampled imu_real velocity);
+        my $sensor_re = join '|', @sensors;
+        my @data = sort(grep {/($sensor_re)\.csv$/} read_dir(catdir(curdir(), $s, $a)));
+        assert(@sensors == @data); # make sure we got all the sensor data
         @data = map {catfile(curdir(), $s, $a, $_)} @data;
         my @activity = grep {/activity_flag\.csv$/} @data;
         assert(@activity == 1);
