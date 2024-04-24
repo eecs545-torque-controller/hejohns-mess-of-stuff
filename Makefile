@@ -26,10 +26,6 @@ $(GUD): default
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
 
-$(WD): $(GUD)
-	$(PYTHON3) window.py $< $@
-	ls --human-readable --size $@
-
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
 .PHONY: default clean
