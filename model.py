@@ -145,7 +145,6 @@ if __name__ == '__main__':
                     y_pred = model(X_batch)
                     assert not y_pred.isnan().any()
                     batch_loss = loss_fn(y_pred, y_batch)
-                    print()
                     try:
                         assert not y_batch.isnan().any()
                     except AssertionError:

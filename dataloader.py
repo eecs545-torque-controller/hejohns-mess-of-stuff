@@ -34,7 +34,7 @@ class GrandLSTMDataset(Dataset):
         # pytorch largely expects float32, not float64 which seems to be the numpy default
         #sample_t = torch.tensor(sample_df.to_numpy(dtype=np.float32))
         #label_t = torch.tensor(label_df.to_numpy(dtype=np.float32))
-        sample_t, label_t = torch.tensor(sample_df), torch.tensor(label_df)
+        sample_t, label_t = torch.tensor(sample_df.to_numpy(dtype=np.float32)), torch.tensor(label_df.to_numpy(dtype=np.float32))
         # these asserts should be redudant, since we should've filtered out any
         # windows with NaNs while generating grandUnifiedData
         assert not sample_t.isnan().any()

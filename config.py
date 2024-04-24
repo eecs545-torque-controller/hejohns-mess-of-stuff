@@ -12,6 +12,8 @@ sensor_list = [
 
         'knee_angle_r',
         'ankle_angle_r',
+        'subtalar_angle_r',
+
         'LTA',
         'RTA',
         'LRF',
