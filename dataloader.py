@@ -12,8 +12,8 @@ from config import *
 
 ## our pytorch data loader
 class GrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
-        with open(sys.argv[1], 'rb') as f:
+    def __init__(self, pickled_data="GrandUnifiedData.pickle", subjects, activities):
+        with open(pickled_data, 'rb') as f:
             self.grandUnifiedData, self.windows = pickle.load(f)
         # if subjects or activities, windows needs to be corrected, by dropping
         # any windows that are for other subjects or activities
