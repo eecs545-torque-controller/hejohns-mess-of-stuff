@@ -46,15 +46,15 @@ class GreedyGrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         with open(pickled_data, 'rb') as f:
             grandUnifiedData, windows = pickle.load(f)
+        # if subjects or activities, windows needs to be corrected, by dropping
+        # any windows that are for other subjects or activities
+        windows = [(s, a, i) for s, a, i in windows if s in subjects and activities.search(a)]
         # save some memory if we have lots of concurrent datasets
         # NOTE: yes this is repeated for every GrandLSTMDataset, but hopefully
         # it's not too slow
         for s in list(grandUnifiedData.keys()):
             if s not in subjects:
                 del grandUnifiedData[s]
-        # if subjects or activities, windows needs to be corrected, by dropping
-        # any windows that are for other subjects or activities
-        windows = [(s, a, i) for s, a, i in windows if s in subjects and activities.search(a)]
         self.windows = []
         for s, a, i in window_indices:
             window = grandUnifiedData[s][a].iloc[i : i + window_size]
