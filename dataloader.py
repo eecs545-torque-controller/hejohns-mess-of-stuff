@@ -21,7 +21,7 @@ class GrandLSTMDataset(Dataset):
         # save a some memory if we have lots of concurrent datasets
         # NOTE: yes this is repeated for every GrandLSTMDataset, but hopefully
         # it's not too slow
-        for s in self.grandUnifiedData.keys():
+        for s in list(self.grandUnifiedData.keys()):
             if s not in subjects:
                 del self.grandUnifiedData[s]
     def __len__(self):
