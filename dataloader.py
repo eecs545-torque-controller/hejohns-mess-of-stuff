@@ -12,7 +12,7 @@ from config import *
 
 ## our pytorch data loader
 class GrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data="GrandUnifiedData.pickle", subjects, activities):
+    def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         with open(pickled_data, 'rb') as f:
             self.grandUnifiedData, self.windows = pickle.load(f)
         # if subjects or activities, windows needs to be corrected, by dropping
