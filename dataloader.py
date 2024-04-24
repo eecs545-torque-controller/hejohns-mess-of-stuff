@@ -12,8 +12,8 @@ from config import *
 
 ## our pytorch data loader
 class GrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
-        with open(sys.argv[1], 'rb') as f:
+    def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
+        with open(pickled_data, 'rb') as f:
             self.grandUnifiedData, self.windows = pickle.load(f)
         # if subjects or activities, windows needs to be corrected, by dropping
         # any windows that are for other subjects or activities
@@ -21,7 +21,7 @@ class GrandLSTMDataset(Dataset):
         # save a some memory if we have lots of concurrent datasets
         # NOTE: yes this is repeated for every GrandLSTMDataset, but hopefully
         # it's not too slow
-        for s in self.grandUnifiedData.keys():
+        for s in list(self.grandUnifiedData.keys()):
             if s not in subjects:
                 del self.grandUnifiedData[s]
     def __len__(self):
