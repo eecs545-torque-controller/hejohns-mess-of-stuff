@@ -7,7 +7,7 @@ PYTHON3 = python3
 GUD = GrandUnifiedData.pickle
 
 # ideally these would be separate targets but...
-default: ProcessedData.zip
+preprocessed_data: ProcessedData.zip
 	# unzip data if it looks like it hasn't been
 	$(PERL) -e '`unzip $^` if !grep {/^AB\d+$$/} read_dir(curdir())'
 	# preprocess the data
@@ -18,7 +18,7 @@ default: ProcessedData.zip
 	## filter for rows where at least one of left or right is active
 	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
-$(GUD): default
+$(GUD): preprocessed_data
 	# single file pickle of data and window indices
 	[ -e $@ ] || $(PYTHON3) pickle_data.py preprocessed_data.csv $@
 	ls --human-readable --size $@
@@ -29,4 +29,4 @@ ProcessedData.zip:
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
 	-rm $(GUD)
-.PHONY: default clean
+.PHONY: preprocessed_data clean
