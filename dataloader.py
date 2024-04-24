@@ -16,15 +16,12 @@ from config import *
 #    def __len__(self):
 #    def __getitem__(self, idx):
 # https://stackoverflow.com/a/12762056
-data = []
 with open(sys.argv[1], 'rb') as f:
-    while 1:
-        try:
-            data.append(pickle.load(f))
-        except EOFError:
-            break
-print(len(data))
-print(data[-1])
+    grandUnifiedData, windows = pickle.load(f)
+print(len(windows))
+
+with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
+    print(grandUnifiedData[windows[-1][0]][windows[-1][1]].iloc[windows[-1][2] : windows[-1][2] + window_size])
 #for s in subjects:
 #    for a in activities[s]:
 #        grandUnifiedData[s][a][sensor_list]
