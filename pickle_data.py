@@ -32,6 +32,7 @@ for s in subjects:
         grandUnifiedData[s][a] = df
         # calculate window indices
         for i in range(len(df.index) - window_size):
+            df = df[sensor_list + output_list]
             dg = df.iloc[i : i + window_size]
             if not dg.isnull().values.any():
                 windows.append((s, a, i))
