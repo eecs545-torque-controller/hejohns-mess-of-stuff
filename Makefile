@@ -3,9 +3,8 @@
 PERL = perl -Mv5.32 -Mutf8 -Mstrict -Mwarnings '-MFile::Slurp qw(read_dir)' -MFile::Spec::Functions
 PYTHON3 = python3
 
-# a pickle of all the data, for storage in memory during training
+# a pickle of all the data and window indices, for storage in memory during training
 GUD = GrandUnifiedData.pickle
-WD = WindowedData.pickle
 
 # ideally these would be separate targets but...
 default: ProcessedData.zip
@@ -28,4 +27,5 @@ ProcessedData.zip:
 
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
+	-rm $(GUD)
 .PHONY: default clean
