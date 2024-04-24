@@ -19,6 +19,7 @@ default: ProcessedData.zip
 	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
 $(GUD): default
+	# single file pickle of data and window indices
 	[ -e $@ ] || $(PYTHON3) pickle_data.py preprocessed_data.csv $@
 	ls --human-readable --size $@
 

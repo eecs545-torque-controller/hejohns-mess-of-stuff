@@ -19,6 +19,8 @@ class GrandLSTMDataset(Dataset):
         # any windows that are for other subjects or activities
         self.windows = [s, a, i for s, a, i in self.windows if s in subjects and activities.search(a)]
         # save a some memory if we have lots of concurrent datasets
+        # NOTE: yes this is repeated for every GrandLSTMDataset, but hopefully
+        # it's not too slow
         for s in self.grandUnifiedData.keys():
             if s not in subjects:
                 del self.grandUnifiedData[s]
