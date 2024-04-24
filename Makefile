@@ -28,6 +28,7 @@ ProcessedData.zip:
 
 $(WD): $(GUD)
 	$(PYTHON3) window.py $< $@
+	ls --human-readable --size $@
 
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
