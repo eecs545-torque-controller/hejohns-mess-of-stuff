@@ -15,7 +15,7 @@ import pytz
 from torch.profiler import profile, record_function, ProfilerActivity
 # our files
 import config
-import load
+import dataloader
 
 class LSTMModel(nn.Module):
     def __init__(self, hidden_size=512, num_layers=1):
@@ -71,13 +71,12 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
     #subjects = [f for f in os.listdir('.') if re.search("AB\d+", f)]
-    subjects = ['AB02']
     #activities = re.compile(".");
     activities = re.compile("normal_walk");
     print(f"initializing training dataset... {curtime()}")
-    training_data = load.GreedyLSTMDataset(subjects, activities)
+    training_data = dataloader.GrandLSTMDataset(['AB02'], activities)
     print(f"initializing test dataset... {curtime()}")
-    test_data = load.GreedyLSTMDataset(['AB01'], activities)
+    test_data = dataloader.GrandLSTMDataset(['AB01'], activities)
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # or the disk IO is really slow
     # I'm just using num_workers=2 so we can set persistent_workers=True
