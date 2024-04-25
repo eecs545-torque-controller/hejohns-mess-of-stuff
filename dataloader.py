@@ -62,13 +62,13 @@ def normalize_data(grandUnifiedData):
                 dfc = grandUnifiedData[s][a][c]
                 grandUnifiedData[s][a][c] = (dfc - (columnwise_sum[c] / columnwise_count[c])) / columnwise_std[c]
     assert all_equal([num for c, num in columnwise_count])
-    return grandUnifiedData
+    return grandUnifiedData, columnwise_sum, columnwise_count, columnwise_std
 
 ## our pytorch data loader
 class GrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         grandUnifiedData, self.windows = filter_unused_data(subjects, activities, pickled_data)
-        self.grandUnifiedData = normalize_data(grandUnifiedData)
+        self.grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
     def __len__(self):
         return len(self.windows)
     def __getitem__(self, idx):
@@ -79,7 +79,7 @@ class GrandLSTMDataset(Dataset):
 class GreedyGrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         grandUnifiedData, windows = filter_unused_data(subjects, activities, pickled_data)
-        grandUnifiedData = normalize_data(grandUnifiedData)
+        grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
         self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
     def __len__(self):
         return len(self.windows)
