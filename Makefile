@@ -9,7 +9,7 @@ GUD = GrandUnifiedData.pickle
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD) ] || $(MAKE) $(GUD)
+	[ -e $(GUD) ] || wget -O $(GUD) https://tempestj.ddns.net/s/7NHrr8beqMXwrbK/download || $(MAKE) $(GUD)
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
