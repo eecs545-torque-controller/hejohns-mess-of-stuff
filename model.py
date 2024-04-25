@@ -74,9 +74,9 @@ if __name__ == '__main__':
     #activities = re.compile(".");
     activities = re.compile("normal_walk");
     print(f"initializing training dataset... {curtime()}")
-    training_data = dataloader.GrandLSTMDataset(['AB02'], activities)
+    training_data = dataloader.GreedyGrandLSTMDataset(['AB02'], activities)
     print(f"initializing test dataset... {curtime()}")
-    test_data = dataloader.GrandLSTMDataset(['AB01'], activities)
+    test_data = dataloader.GreedyGrandLSTMDataset(['AB01'], activities)
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # or the disk IO is really slow
     # I'm just using num_workers=2 so we can set persistent_workers=True
