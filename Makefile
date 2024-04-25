@@ -6,6 +6,11 @@ PYTHON3 = python3
 # a pickle of all the data and window indices, for storage in memory during training
 GUD = GrandUnifiedData.pickle
 
+# hack, but we don't want to rebuild $(GUD) if it already exists,
+# but the normal target will always build preprocessed_data since it's phony
+default:
+	[ -e $(GUD) ] || $(MAKE) $(GUD)
+
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
 	# unzip data if it looks like it hasn't been
