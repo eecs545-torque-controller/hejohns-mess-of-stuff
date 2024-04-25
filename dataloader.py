@@ -61,7 +61,7 @@ def normalize_data(grandUnifiedData):
             for a in grandUnifiedData[s].keys():
                 dfc = grandUnifiedData[s][a][c]
                 grandUnifiedData[s][a][c] = (dfc - (columnwise_sum[c] / columnwise_count[c])) / columnwise_std[c]
-    assert all_equal([num for c, num in columnwise_count])
+    assert all_equal([columnwise_count[c] for c in columnwise_count.keys()])
     return grandUnifiedData, columnwise_sum, columnwise_count, columnwise_std
 
 ## our pytorch data loader
