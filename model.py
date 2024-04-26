@@ -105,17 +105,24 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
-    subjects = [f for f in os.listdir(os.getcwd()) if re.search("AB\d+", f)]
+    pickled_data = read_entire_pickle()
+    data, windows = pickled_data
+    subjects = data.keys()
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
     activities = re.compile(".");
     #activities = re.compile("normal_walk"); # smaller dataset
     print(f"initializing training dataset... {curtime()}")
-    training_data = dataloader.GreedyGrandLSTMDataset(training_subjects, activities)
+    # error checking
+    num_total_windows = len(windows)
+    training_data = dataloader.GreedyGrandLSTMDataset(pickled_data, training_subjects, activities)
+    num_training_windows = training_data.__len__()
     print(f"done initializing training dataset... {curtime()}")
     print(f"initializing test dataset... {curtime()}")
-    test_data = dataloader.GreedyGrandLSTMDataset(test_subjects, activities)
+    test_data = dataloader.GreedyGrandLSTMDataset(read_entire_pickle(), test_subjects, activities)
+    num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
+    assert num_total_windows == num_training_windows + num_test_windows
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources

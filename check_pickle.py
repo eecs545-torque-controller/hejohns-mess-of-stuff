@@ -8,9 +8,10 @@ import re
 from config import *
 from dataloader import *
 
-subjects = [f for f in os.listdir('.') if re.search("AB\d+", f)]
+pickled_data = read_entire_pickle()
+subjects = pickled_data[0].keys()
 activities = re.compile(".");
-dataset = GrandLSTMDataset(subjects, activities)
+dataset = GrandLSTMDataset(grandUnifiedData, windows, subjects, activities)
 for s in dataset.grandUnifiedData.keys():
     for a in dataset.grandUnifiedData[s].keys():
         print(f"{s}/{a}")

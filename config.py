@@ -86,6 +86,11 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 n_epochs = 4000 # taken from the paper
 
+def read_entire_pickle():
+    with open(pickled_data, 'rb') as f:
+        grandUnifiedData, windows = pickle.load("GrandUnifiedData.pickle")
+    return grandUnifiedData, windows
+
 # little performance debugging helper
 def curtime():
     return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
