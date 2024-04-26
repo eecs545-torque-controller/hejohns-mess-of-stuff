@@ -126,7 +126,8 @@ if __name__ == '__main__':
     test_data = dataloader.GreedyGrandLSTMDataset(read_entire_pickle(), test_subjects, activities)
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
-    assert num_total_windows == num_training_windows + num_test_windows
+    # NOTE: if we're using all the data
+    #assert num_total_windows == num_training_windows + num_test_windows
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
