@@ -30,7 +30,7 @@ def normalize_data(grandUnifiedData):
     return grandUnifiedData, columnwise_sum, columnwise_count, columnwise_std
 
 assert len(sys.argv) == 3
-grandUnifiedData, windows = read_entire_pickle(sys.argv[1])
+grandUnifiedData, windows, *_ = read_entire_pickle(sys.argv[1])
 grandUnifiedData, columnwise_sum, columnwise_count, columnwise_std = normalize_data(grandUnifiedData)
 with open(sys.argv[2], 'wb') as f:
     pickle.dump((grandUnifiedData, windows, columnwise_sum, columnwise_count, columnwise_std), f)
