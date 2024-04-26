@@ -121,16 +121,16 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(2 if device == "cuda" else 0),
-            persistent_workers=(device == "cuda"),
+            #num_workers=(2 if device == "cuda" else 0),
+            #persistent_workers=(device == "cuda"),
             )
     test_dataloader = torch.utils.data.DataLoader(
             test_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(2 if device == "cuda" else 0),
-            persistent_workers=(device == "cuda"),
+            #num_workers=(2 if device == "cuda" else 0),
+            #persistent_workers=(device == "cuda"),
             )
 
     if os.path.isfile(checkpoint_path) and len(sys.argv) > 1:
