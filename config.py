@@ -99,5 +99,8 @@ def all_equal(l):
 def curtime():
     return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
 
+# if we should only predict the moments at the last timestamp, or the entire window
+LAST = True
+
 if __name__ == '__main__':
     print("This file shouldn't be run directly")

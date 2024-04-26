@@ -17,7 +17,7 @@ from config import *
 import dataloader
 
 class LSTMModel(nn.Module):
-    def __init__(self, hidden_size=512, num_layers=1):
+    def __init__(self, hidden_size=512, num_layers=2):
         super().__init__()
         self.input_size = len(sensor_list)
         self.hidden_size = hidden_size
@@ -34,8 +34,8 @@ class LSTMModel(nn.Module):
     def forward(self, x):
         x, _ = self.lstm(x)
         x = self.linear(x)
-        ## if we're only interested in the moments at the last timestamp
-        #x = x[:, -1, :]
+        if LAST: # if we're only interested in the moments at the last timestamp
+            x = x[:, -1, :]
         return x
 
 def total_mse(dataloader, loss_fn):
@@ -73,8 +73,10 @@ def eval_rmse(dataloader, loss_fn):
     assert not model.training
     total_loss, num_samples = total_mse(dataloader, loss_fn)
     error = rmse(total_loss, num_samples)
-    total_loss, num_samples = total_mse_just_final(dataloader, loss_fn)
-    just_final = rmse(total_loss, num_samples)
+    just_final = 737
+    if not LAST:
+        total_loss, num_samples = total_mse_just_final(dataloader, loss_fn)
+        just_final = rmse(total_loss, num_samples)
     return error, just_final
 
 # https://stackoverflow.com/a/73704579
