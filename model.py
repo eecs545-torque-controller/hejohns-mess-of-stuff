@@ -47,8 +47,8 @@ def total_mse(dataloader, loss_fn):
         batch_loss = loss_fn(y_pred, y_batch)
         assert not batch_loss.isnan().any()
         batch_size = X_batch.size()[0]
-        total_training_loss += batch_loss.item() * batch_size
-        num_training_batches += batch_size
+        total_loss += batch_loss.item() * batch_size
+        num_samples += batch_size
     return total_loss, num_samples
 
 def total_mse_just_final(dataloader, loss_fn):
