@@ -102,6 +102,7 @@ if __name__ == '__main__':
     print(f"Running on {device}")
     # basic initialization
     model = LSTMModel()
+    model = nn.DataParallel(model)
     model = model.to(device, non_blocking=True)
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
