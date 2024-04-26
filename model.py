@@ -186,8 +186,8 @@ if __name__ == '__main__':
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
-                train_rmse, train_rmse_just_final = eval_rmse(train_dataloader)
-                test_rmse, test_rmse_just_final = eval_rmse(test_dataloader)
+                train_rmse, train_rmse_just_final = eval_rmse(train_dataloader, loss_fn)
+                test_rmse, test_rmse_just_final = eval_rmse(test_dataloader, loss_fn)
                 print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
                 print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
             last_eval_time = time.time()
