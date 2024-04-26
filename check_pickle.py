@@ -11,7 +11,7 @@ from dataloader import *
 pickled_data = read_entire_pickle()
 subjects = pickled_data[0].keys()
 activities = re.compile(".");
-dataset = GrandLSTMDataset(grandUnifiedData, windows, subjects, activities)
+dataset = GrandLSTMDataset(pickled_data, windows, subjects, activities)
 for s in dataset.grandUnifiedData.keys():
     for a in dataset.grandUnifiedData[s].keys():
         print(f"{s}/{a}")
