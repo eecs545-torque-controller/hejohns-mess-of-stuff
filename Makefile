@@ -27,7 +27,8 @@ preprocessed_data: ProcessedData.zip
 
 $(GUD):
 	# single file pickle of data and window indices
-	[ -e $@ ] || ($(MAKE) preprocessed_data && $(PYTHON3) pickle_data.py preprocessed_data.csv $@)
+	$(MAKE) preprocessed_data
+	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
 	ls --human-readable --size $@
 
 $(GUD_NORMAL): $(GUD)
