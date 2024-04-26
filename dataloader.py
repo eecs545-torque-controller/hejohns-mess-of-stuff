@@ -4,6 +4,8 @@ import pandas
 import numpy as np
 import pickle
 import sys
+from multiprocess import Pool
+import dill # required by multiprocess, although we're not actually using it directly
 
 from config import *
 
@@ -65,8 +67,12 @@ def normalize_data(grandUnifiedData):
 # our pytorch data loader
 class GrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
+        print(f"starting to filter_unused_data... {curtime()}")
         grandUnifiedData, self.windows = filter_unused_data(subjects, activities, pickled_data)
+        print(f"filter_unused_data finished at {curtime()}")
+        print(f"starting to normalize_data... {curtime()}")
         self.grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
+        print(f"normalize_data finished at {curtime()}")
     def __len__(self):
         return len(self.windows)
     def __getitem__(self, idx):
@@ -77,9 +83,17 @@ class GrandLSTMDataset(Dataset):
 # NOTE: requires ~46G memory on full dataset, ~2G on just one subject, norm_walk*
 class GreedyGrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
+        print(f"starting to filter_unused_data... {curtime()}")
         grandUnifiedData, windows = filter_unused_data(subjects, activities, pickled_data)
+        print(f"filter_unused_data finished at {curtime()}")
+        print(f"starting to normalize_data... {curtime()}")
         grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
-        self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
+        print(f"normalize_data finished at {curtime()}")
+        print(f"starting to get_window ... {curtime()}")
+        with Pool(processes=8) as pool:
+            #self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
+            self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
+        print(f"get_window finished at {curtime()}")
     def __len__(self):
         return len(self.windows)
     def __getitem__(self, idx):

@@ -10,8 +10,6 @@ import numpy as np
 import sys
 import os
 import re
-import datetime
-import pytz
 import time
 # our files
 from config import *
@@ -92,10 +90,6 @@ class EarlyStop:
 
 def rmse(total_loss, num_samples):
     return np.sqrt(total_loss / num_samples)
-
-# little performance debugging helper
-def curtime():
-    return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
 
 # for local testing
 #torch.set_num_threads(48)

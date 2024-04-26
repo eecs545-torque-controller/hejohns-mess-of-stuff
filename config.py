@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import torch
+import datetime
+import pytz
 
 # TODO: check this again
 sensor_list = [
@@ -83,6 +85,10 @@ checkpoint_path = 'saved_model.ckpt'
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 n_epochs = 4000 # taken from the paper
+
+# little performance debugging helper
+def curtime():
+    return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
 
 if __name__ == '__main__':
     print("This file shouldn't be run directly")
