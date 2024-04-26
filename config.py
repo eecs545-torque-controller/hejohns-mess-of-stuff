@@ -92,6 +92,9 @@ def read_entire_pickle(filepath="GrandUnifiedData_normalized.pickle"):
         grandUnifiedData, windows, *_ = pickle.load(f)
     return grandUnifiedData, windows
 
+def all_equal(l):
+    return all(x == l[0] for x in l)
+
 # little performance debugging helper
 def curtime():
     return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()

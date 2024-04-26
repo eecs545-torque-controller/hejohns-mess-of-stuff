@@ -27,9 +27,6 @@ def get_window(grandUnifiedData, s, a, i):
     assert not label_t.isnan().any()
     return sample_t, label_t
 
-def all_equal(l):
-    return all(x == l[0] for x in l)
-
 # our pytorch data loader
 class GrandLSTMDataset(Dataset):
     def __init__(self, pickled_data, subjects, activities):

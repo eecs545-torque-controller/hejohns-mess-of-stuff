@@ -11,7 +11,7 @@ GUD_NORMAL = GrandUnifiedData_normalized.pickle
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) TODO || $(MAKE) $(GUD_NORMAL)
+	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) TODO || rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL)
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
