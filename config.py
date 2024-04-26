@@ -89,8 +89,8 @@ n_epochs = 4000 # taken from the paper
 
 def read_entire_pickle(filepath="GrandUnifiedData_normalized.pickle"):
     with open(filepath, 'rb') as f:
-        grandUnifiedData, windows, *_ = pickle.load(f)
-    return grandUnifiedData, windows
+        grandUnifiedData, windows, *normalization_params = pickle.load(f)
+    return grandUnifiedData, windows, normalization_params
 
 def all_equal(l):
     return all(x == l[0] for x in l)
