@@ -42,6 +42,7 @@ def total_mse(dataloader, loss_fn):
     total_loss = 0.0
     num_samples = 0
     for X_batch, y_batch in dataloader:
+        X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
         y_pred = model(X_batch)
         assert not y_pred.isnan().any()
         batch_loss = loss_fn(y_pred, y_batch)
@@ -56,6 +57,7 @@ def total_mse_just_final(dataloader, loss_fn):
     total_loss = 0.0
     num_samples = 0
     for X_batch, y_batch in dataloader:
+        X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
         y_pred = model(X_batch)
         assert not y_pred.isnan().any()
         y_pred = y_pred[:, -1, :]
@@ -108,11 +110,12 @@ if __name__ == '__main__':
     loss_fn = nn.MSELoss() # taken from the paper
     pickled_data = read_entire_pickle()
     data, windows = pickled_data
-    subjects = data.keys()
+    #subjects = data.keys()
+    subjects = ['AB01']
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
-    activities = re.compile(".");
-    #activities = re.compile("normal_walk"); # smaller dataset
+    #activities = re.compile(".");
+    activities = re.compile("normal_walk"); # smaller dataset
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
