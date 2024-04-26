@@ -94,7 +94,7 @@ class GreedyGrandLSTMDataset(Dataset):
         with Pool(processes=min(len(os.sched_getaffinity(0)), 8)) as pool:
             #self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
             self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
-        print(f"get_window finished at {curtime()}")
+        print(f"get_window finished at {curtime()}", flush=True)
     def __len__(self):
         return len(self.windows)
     def __getitem__(self, idx):
