@@ -194,7 +194,7 @@ if __name__ == '__main__':
                 #'loss': loss
                 }, checkpoint_path)
             last_save_time = time.time()
-        if time.time() > last_eval_time + 60: # only eval every n epochs
+        if time.time() > last_eval_time + 60 or epoch % 50 == 0: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
