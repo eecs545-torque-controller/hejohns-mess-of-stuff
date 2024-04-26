@@ -109,7 +109,7 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
-    grandUnifiedData, windows, columnwise_sum, columnwise_count, columnwise_std = read_entire_pickle()
+    grandUnifiedData, windows, normalization_params = read_entire_pickle()
     #subjects = data.keys()
     subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']

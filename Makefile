@@ -28,12 +28,14 @@ preprocessed_data: ProcessedData.zip
 $(GUD):
 	# single file pickle of data and window indices
 	$(MAKE) preprocessed_data
-	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
+	$(PYTHON3) pickle_data.py preprocessed_data.csv $@.tmp
+	# normalize moments by kg
+	$(PYTHON3) normalize_moments.py $@.tmp $@
 	ls --human-readable --size $@
 
 $(GUD_NORMAL): $(GUD)
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
-	$(PYTHON3) normalize.py $(GUD) $@
+	$(PYTHON3) normalize.py $< $@
 	ls --human-readable --size $@
 
 ProcessedData.zip:
