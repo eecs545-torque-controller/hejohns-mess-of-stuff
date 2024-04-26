@@ -39,7 +39,7 @@ $(GUD_NORMAL): $(GUD)
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
 
-check_data.txt:
+check_data.txt: $(GUD) $(GUD_NORMAL)
 	$(PYTHON3) check_pickle.py > $@
 
 clean:
