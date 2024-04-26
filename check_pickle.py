@@ -10,11 +10,11 @@ from dataloader import *
 
 def check(filepath):
     grandUnifiedData, windows, *normalization_params = read_entire_pickle(filepath=filepath)
-    print(f"dataset has {len(dataset.windows)} windows")
+    print(f"has {len(windows)} windows")
     print("normalization_params: ", normalization_params)
     subjects = grandUnifiedData.keys()
     activities = re.compile(".");
-    dataset = GrandLSTMDataset(pickled_data, subjects, activities)
+    dataset = GrandLSTMDataset((grandUnifiedData, windows), subjects, activities)
     print("--------------------")
     for s in dataset.grandUnifiedData.keys():
         for a in dataset.grandUnifiedData[s].keys():
