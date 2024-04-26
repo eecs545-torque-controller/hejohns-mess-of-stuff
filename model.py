@@ -145,7 +145,7 @@ if __name__ == '__main__':
         print(f"No checkpoint found since {os.path.isfile(checkpoint_path)} and {len(sys.argv) > 1}. Starting training from scratch.... {curtime()}")
     should_early_stop = EarlyStop() # taken from the paper
     last_save_time = time.time()
-    last_eval_time = time.time()
+    last_eval_time = 0
     for epoch in range(start_epoch, n_epochs):
         #print(f"epoch {epoch} at {curtime()}")
         model.train()
