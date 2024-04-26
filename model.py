@@ -109,9 +109,7 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
-    pickled_data = read_entire_pickle()
-    grandUnifiedData, windows = pickled_data
-    normalized_data, columnwise_sum, columnwise_count, columnwise_std = dataloader.normalize_data(grandUnifiedData)
+    grandUnifiedData, windows, columnwise_sum, columnwise_count, columnwise_std = read_entire_pickle()
     #subjects = data.keys()
     subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']
@@ -121,11 +119,13 @@ if __name__ == '__main__':
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
-    training_data = dataloader.GreedyGrandLSTMDataset(pickled_data, training_subjects, activities)
+    training_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
     num_training_windows = training_data.__len__()
     print(f"done initializing training dataset... {curtime()}")
     print(f"initializing test dataset... {curtime()}")
-    test_data = dataloader.GreedyGrandLSTMDataset(pickled_data, test_subjects, activities)
+    # NOTE: training and test data should never overlap, so we can reuse the dict and list
+    test_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
+    del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
     # NOTE: if we're using all the data

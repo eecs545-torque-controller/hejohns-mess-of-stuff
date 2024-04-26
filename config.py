@@ -87,9 +87,9 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 
 n_epochs = 4000 # taken from the paper
 
-def read_entire_pickle():
-    with open("GrandUnifiedData.pickle", 'rb') as f:
-        grandUnifiedData, windows = pickle.load(f)
+def read_entire_pickle(filepath="GrandUnifiedData_normalized.pickle"):
+    with open(filepath, 'rb') as f:
+        grandUnifiedData, windows, *_ = pickle.load(f)
     return grandUnifiedData, windows
 
 # little performance debugging helper

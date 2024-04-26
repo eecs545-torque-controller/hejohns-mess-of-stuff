@@ -5,11 +5,13 @@ PYTHON3 = python3
 
 # a pickle of all the data and window indices, for storage in memory during training
 GUD = GrandUnifiedData.pickle
+# and a normalized version, with column-wise mean and std dev as well
+GUD_NORMAL = GrandUnifiedData_normalized.pickle
 
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD) ] || wget -O $(GUD) https://tempestj.ddns.net/s/7NHrr8beqMXwrbK/download || $(MAKE) $(GUD)
+	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) TODO || $(MAKE) $(GUD_NORMAL)
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
@@ -26,6 +28,11 @@ preprocessed_data: ProcessedData.zip
 $(GUD): preprocessed_data
 	# single file pickle of data and window indices
 	[ -e $@ ] || $(PYTHON3) pickle_data.py preprocessed_data.csv $@
+	ls --human-readable --size $@
+
+$(GUD_NORMAL): $(GUD)
+	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
+	[ -e $@ ] || $(PYTHON3) normalize.py $(GUD) $@
 	ls --human-readable --size $@
 
 ProcessedData.zip:
