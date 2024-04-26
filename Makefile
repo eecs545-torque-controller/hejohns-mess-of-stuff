@@ -11,7 +11,7 @@ GUD_NORMAL = GrandUnifiedData_normalized.pickle
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) TODO || rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL)
+	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) TODO || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
@@ -25,9 +25,9 @@ preprocessed_data: ProcessedData.zip
 	## filter for rows where at least one of left or right is active
 	$(PERL) foreach.pl filter.py aggregate preprocessed_data.csv
 
-$(GUD): | preprocessed_data
+$(GUD):
 	# single file pickle of data and window indices
-	[ -e $@ ] || $(PYTHON3) pickle_data.py preprocessed_data.csv $@
+	[ -e $@ ] || ($(MAKE) preprocessed_data && $(PYTHON3) pickle_data.py preprocessed_data.csv $@)
 	ls --human-readable --size $@
 
 $(GUD_NORMAL): $(GUD)
