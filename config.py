@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import torch
+
 # TODO: check this again
 sensor_list = [
         'hip_flexion_l',
@@ -78,7 +80,7 @@ window_size = 50
 
 checkpoint_path = 'saved_model.ckpt'
 
-device = "cuda" if torch.cuda_is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 n_epochs = 4000 # taken from the paper
 
