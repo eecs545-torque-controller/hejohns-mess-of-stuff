@@ -139,10 +139,10 @@ if __name__ == '__main__':
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         start_epoch = checkpoint['epoch']
         #loss = checkpoint['loss']
-        print(f"Checkpoint loaded. Resuming training from epoch {start_epoch}... {curtime}")
+        print(f"Checkpoint loaded. Resuming training from epoch {start_epoch}... {curtime()}")
     else:
         start_epoch = 0
-        print(f"No checkpoint found since {os.path.isfile(checkpoint_path)} and {len(sys.argv) > 1}. Starting training from scratch.... {curtime}")
+        print(f"No checkpoint found since {os.path.isfile(checkpoint_path)} and {len(sys.argv) > 1}. Starting training from scratch.... {curtime()}")
     should_early_stop = EarlyStop() # taken from the paper
     last_save_time = time.time()
     last_eval_time = time.time()
