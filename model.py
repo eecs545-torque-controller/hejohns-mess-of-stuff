@@ -36,40 +36,43 @@ class LSTMModel(nn.Module):
         ## if we're only interested in the moments at the last timestamp
         #x = x[:, -1, :]
         return x
-    def total_mse(dataloader, loss_fn):
-        assert not model.training
-        total_loss = 0.0
-        num_samples = 0
-        for X_batch, y_batch in dataloader:
-            y_pred = model(X_batch)
-            assert not y_pred.isnan().any()
-            batch_loss = loss_fn(y_pred, y_batch)
-            assert not batch_loss.isnan().any()
-            batch_size = X_batch.size()[0]
-            total_training_loss += batch_loss.item() * batch_size
-            num_training_batches += batch_size
-        return total_loss, num_samples
-    def total_mse_just_final(dataloader, loss_fn):
-        assert not model.training
-        total_loss = 0.0
-        num_samples = 0
-        for X_batch, y_batch in dataloader:
-            y_pred = model(X_batch)
-            assert not y_pred.isnan().any()
-            y_pred = y_pred[:, -1, :]
-            y_batch = y_batch[:, -1, :]
-            batch_loss = loss_fn(y_pred, y_batch)
-            assert not batch_loss.isnan().any()
-            total_loss += batch_loss.item()
-            num_samples += 1
-        return total_loss, num_samples
-    def eval_rmse(dataloader, loss_fn):
-        assert not model.training
-        total_loss, num_samples = total_mse(dataloader, loss_fn)
-        error = rmse(total_loss, num_samples)
-        total_loss, num_samples = total_mse_just_final(dataloader, loss_fn)
-        just_final = rmse(total_loss, num_samples)
-        return error, just_final
+
+def total_mse(dataloader, loss_fn):
+    assert not model.training
+    total_loss = 0.0
+    num_samples = 0
+    for X_batch, y_batch in dataloader:
+        y_pred = model(X_batch)
+        assert not y_pred.isnan().any()
+        batch_loss = loss_fn(y_pred, y_batch)
+        assert not batch_loss.isnan().any()
+        batch_size = X_batch.size()[0]
+        total_training_loss += batch_loss.item() * batch_size
+        num_training_batches += batch_size
+    return total_loss, num_samples
+
+def total_mse_just_final(dataloader, loss_fn):
+    assert not model.training
+    total_loss = 0.0
+    num_samples = 0
+    for X_batch, y_batch in dataloader:
+        y_pred = model(X_batch)
+        assert not y_pred.isnan().any()
+        y_pred = y_pred[:, -1, :]
+        y_batch = y_batch[:, -1, :]
+        batch_loss = loss_fn(y_pred, y_batch)
+        assert not batch_loss.isnan().any()
+        total_loss += batch_loss.item()
+        num_samples += 1
+    return total_loss, num_samples
+
+def eval_rmse(dataloader, loss_fn):
+    assert not model.training
+    total_loss, num_samples = total_mse(dataloader, loss_fn)
+    error = rmse(total_loss, num_samples)
+    total_loss, num_samples = total_mse_just_final(dataloader, loss_fn)
+    just_final = rmse(total_loss, num_samples)
+    return error, just_final
 
 # https://stackoverflow.com/a/73704579
 class EarlyStop:
