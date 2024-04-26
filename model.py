@@ -11,6 +11,7 @@ import sys
 import os
 import re
 import time
+import copy
 # our files
 from config import *
 import dataloader
@@ -109,7 +110,8 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
     pickled_data = read_entire_pickle()
-    data, windows = pickled_data
+    grandUnifiedData, windows = pickled_data
+    normalized_data, columnwise_sum, columnwise_count, columnwise_std = dataloader.normalize_data(grandUnifiedData)
     #subjects = data.keys()
     subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']
@@ -123,11 +125,12 @@ if __name__ == '__main__':
     num_training_windows = training_data.__len__()
     print(f"done initializing training dataset... {curtime()}")
     print(f"initializing test dataset... {curtime()}")
-    test_data = dataloader.GreedyGrandLSTMDataset(read_entire_pickle(), test_subjects, activities)
+    test_data = dataloader.GreedyGrandLSTMDataset(pickled_data, test_subjects, activities)
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
     # NOTE: if we're using all the data
     #assert num_total_windows == num_training_windows + num_test_windows
+    print()
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
@@ -194,7 +197,7 @@ if __name__ == '__main__':
                 #'loss': loss
                 }, checkpoint_path)
             last_save_time = time.time()
-        if time.time() > last_eval_time + 60 or epoch % 50 == 0: # only eval every n epochs
+        if time.time() > last_eval_time + 300 or epoch % 50 == 0: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():

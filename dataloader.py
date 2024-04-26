@@ -10,19 +10,10 @@ import dill # required by multiprocess, although we're not actually using it dir
 
 from config import *
 
-# modifies the pickled_data
-def filter_unused_data(pickled_data, subjects, activities):
+def filter_unused_data(windows, subjects, activities):
     # if subjects or activities, windows needs to be corrected, by dropping
     # any windows that are for other subjects or activities
-    grandUnifiedData, windows = pickled_data
-    windows = [(s, a, i) for s, a, i in windows if s in subjects and activities.search(a)]
-    # save some memory if we have lots of concurrent datasets
-    # NOTE: yes this is repeated for every GrandLSTMDataset, but hopefully
-    # it's not too slow
-    for s in list(grandUnifiedData.keys()):
-        if s not in subjects:
-            del grandUnifiedData[s]
-    return grandUnifiedData, windows
+    return [(s, a, i) for s, a, i in windows if s in subjects and activities.search(a)]
 
 def get_window(grandUnifiedData, s, a, i):
     window = grandUnifiedData[s][a].iloc[i : i + window_size]
@@ -67,33 +58,29 @@ def normalize_data(grandUnifiedData):
 
 # our pytorch data loader
 class GrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
+    def __init__(self, normalized_data, subjects, activities):
         print(f"starting to filter_unused_data... {curtime()}")
-        grandUnifiedData, self.windows = filter_unused_data(pickled_data, subjects, activities)
+        self.normalized_data, windows = normalized_data
+        self.windows = filter_unused_data(windows, subjects, activities)
         print(f"filter_unused_data finished at {curtime()}")
-        print(f"starting to normalize_data... {curtime()}")
-        self.grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
-        print(f"normalize_data finished at {curtime()}")
     def __len__(self):
         return len(self.windows)
     def __getitem__(self, idx):
         s, a, i = self.windows[idx]
-        return get_window(self.grandUnifiedData, s, a, i)
+        return get_window(self.normalized_data, s, a, i)
 
 # precompute all windows and try to fit them all in memory
 # NOTE: requires ~46G memory on full dataset, ~2G on just one subject, norm_walk*
 class GreedyGrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
+    def __init__(self, normalized_data, subjects, activities):
+        _, windows = normalized_data
         print(f"starting to filter_unused_data... {curtime()}")
-        grandUnifiedData, windows = filter_unused_data(pickled_data, subjects, activities)
+        windows = filter_unused_data(windows, subjects, activities)
         print(f"filter_unused_data finished at {curtime()}")
-        print(f"starting to normalize_data... {curtime()}")
-        grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
-        print(f"normalize_data finished at {curtime()}")
         print(f"starting to get_window ... {curtime()}")
         with Pool(processes=min(len(os.sched_getaffinity(0)), 8)) as pool:
             #self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
-            self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
+            self.windows = pool.map((lambda t: get_window(normalized_data, t[0], t[1], t[2])), windows)
         print(f"get_window finished at {curtime()}", flush=True)
     def __len__(self):
         return len(self.windows)
