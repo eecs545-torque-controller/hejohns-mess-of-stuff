@@ -162,7 +162,7 @@ if __name__ == '__main__':
     last_save_time = time.time()
     last_eval_time = 0
     for epoch in range(start_epoch, n_epochs):
-        #print(f"epoch {epoch} at {curtime()}")
+        print(f"epoch {epoch} at {curtime()}")
         model.train()
         total_training_loss = 0.0 # sum of losses of all batches
         num_samples = 0 # number of total samples trained on
@@ -186,7 +186,7 @@ if __name__ == '__main__':
             #print(f"after batch {curtime()}")
         # save checkpoint
         #print(f"saving model at {curtime()}")
-        if time.time() > last_save_time + 1800:
+        if time.time() > last_save_time + 300:
             torch.save({
                 'epoch': epoch + 1,
                 'model_state_dict': model.state_dict(),
@@ -194,14 +194,14 @@ if __name__ == '__main__':
                 #'loss': loss
                 }, checkpoint_path)
             last_save_time = time.time()
-        if time.time() > last_eval_time + 1800: # only eval every n epochs
+        if time.time() > last_eval_time + 60: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
                 train_rmse, train_rmse_just_final = eval_rmse(train_dataloader, loss_fn)
                 test_rmse, test_rmse_just_final = eval_rmse(test_dataloader, loss_fn)
-                print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
-                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
+                print(f"Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
+                print(f"Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
             last_eval_time = time.time()
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
