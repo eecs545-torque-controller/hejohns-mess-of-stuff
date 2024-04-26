@@ -90,7 +90,7 @@ class GreedyGrandLSTMDataset(Dataset):
         grandUnifiedData, self.columnwise_sum, self.columnwise_count, self.columnwise_std = normalize_data(grandUnifiedData)
         print(f"normalize_data finished at {curtime()}")
         print(f"starting to get_window ... {curtime()}")
-        with Pool(processes=8) as pool:
+        with Pool(processes=4) as pool:
             #self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
             self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
         print(f"get_window finished at {curtime()}")
