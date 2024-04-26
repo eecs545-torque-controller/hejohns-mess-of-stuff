@@ -111,7 +111,7 @@ if __name__ == '__main__':
     pickled_data = read_entire_pickle()
     data, windows = pickled_data
     #subjects = data.keys()
-    subjects = ['AB02']
+    subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
     #activities = re.compile(".");
