@@ -41,5 +41,5 @@ ProcessedData.zip:
 
 clean:
 	find . -maxdepth 1 -type d -name 'AB[0-9]*' -exec rm -r '{}' +
-	-rm $(GUD)
+	-rm $(GUD) $(GUD_NORMAL)
 .PHONY: preprocessed_data clean
