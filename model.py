@@ -200,8 +200,8 @@ if __name__ == '__main__':
             with torch.no_grad():
                 train_rmse, train_rmse_just_final = eval_rmse(train_dataloader, loss_fn)
                 test_rmse, test_rmse_just_final = eval_rmse(test_dataloader, loss_fn)
-                print(f"Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
-                print(f"Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, test_rmse_just_final)
+                print(f"Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse, train_rmse_just_final)
+                print(f"Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f", epoch, train_rmse_just_final, test_rmse_just_final)
             last_eval_time = time.time()
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
