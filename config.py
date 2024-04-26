@@ -76,5 +76,11 @@ batch_size = 64
 
 window_size = 50
 
+checkpoint_path = 'saved_model.ckpt'
+
+device = "cuda" if torch.cuda_is_available() else "cpu"
+
+n_epochs = 4000 # taken from the paper
+
 if __name__ == '__main__':
     print("This file shouldn't be run directly")

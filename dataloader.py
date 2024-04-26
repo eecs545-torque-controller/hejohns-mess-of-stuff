@@ -1,7 +1,4 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
 from torch.utils.data import Dataset
 import pandas
 import numpy as np
@@ -28,7 +25,7 @@ def get_window(grandUnifiedData, s, a, i):
     window = grandUnifiedData[s][a].iloc[i : i + window_size]
     # I don't think pytorch accepts anything besides tensors
     sample_df, label_df = window[sensor_list], window[output_list]
-    # pytorch largely expects float32, not float64 which seems to be the numpy default
+    # pytorch by default expects float32, not float64 which seems to be the numpy default
     sample_t, label_t = torch.tensor(sample_df.to_numpy(dtype=np.float32)), torch.tensor(label_df.to_numpy(dtype=np.float32))
     # these asserts should be redudant, since we should've filtered out any
     # windows with NaNs while generating GrandUnifiedData.pickle
@@ -39,6 +36,7 @@ def get_window(grandUnifiedData, s, a, i):
 def all_equal(l):
     return all(x == l[0] for x in l)
 
+# really slow algorithm but only run on init
 def normalize_data(grandUnifiedData):
     columnwise_sum = {}
     columnwise_count = {}
@@ -64,7 +62,7 @@ def normalize_data(grandUnifiedData):
     assert all_equal([columnwise_count[c] for c in columnwise_count.keys()])
     return grandUnifiedData, columnwise_sum, columnwise_count, columnwise_std
 
-## our pytorch data loader
+# our pytorch data loader
 class GrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         grandUnifiedData, self.windows = filter_unused_data(subjects, activities, pickled_data)
@@ -76,6 +74,7 @@ class GrandLSTMDataset(Dataset):
         return get_window(self.grandUnifiedData, s, a, i)
 
 # precompute all windows and try to fit them all in memory
+# NOTE: requires ~46G memory on full dataset, ~2G on just one subject, norm_walk*
 class GreedyGrandLSTMDataset(Dataset):
     def __init__(self, subjects, activities, pickled_data="GrandUnifiedData.pickle"):
         grandUnifiedData, windows = filter_unused_data(subjects, activities, pickled_data)
