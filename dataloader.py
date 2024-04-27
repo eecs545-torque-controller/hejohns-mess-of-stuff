@@ -56,7 +56,7 @@ class GreedyGrandLSTMDataset(Dataset):
         if len(windows) > 0: # for testing
             # serializing grandUnifiedData is REALLY slow, so it only makes sense to do when the number of windows is very large
             ## first, let's try to cut down on size of grandUnifiedData
-            for s in grandUnifiedData.keys():
+            for s in list(grandUnifiedData.keys()):
                 if s not in subjects:
                     self.unused_data[s] = grandUnifiedData[s]
                     del grandUnifiedData[s]
