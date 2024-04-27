@@ -38,7 +38,7 @@ class LSTMModel(nn.Module):
             x = x[:, -1, :]
         return x
 
-def total_mse(dataloader, loss_fn):
+def total_mse(dataloader, just_final):
     assert not model.training
     total_loss = 0.0
     num_samples = 0
@@ -46,36 +46,24 @@ def total_mse(dataloader, loss_fn):
         X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
         y_pred = model(X_batch)
         assert not y_pred.isnan().any()
-        batch_loss = loss_fn(y_pred, y_batch)
-        assert not batch_loss.isnan().any()
-        batch_size = X_batch.size()[0]
-        total_loss += batch_loss.item() * batch_size
-        num_samples += batch_size
-    return total_loss, num_samples
-
-def total_mse_just_final(dataloader, loss_fn):
-    assert not model.training
-    total_loss = 0.0
-    num_samples = 0
-    for X_batch, y_batch in dataloader:
-        X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
-        y_pred = model(X_batch)
-        assert not y_pred.isnan().any()
-        y_pred = y_pred[:, -1, :]
-        y_batch = y_batch[:, -1, :]
+        if just_final:
+            y_pred = y_pred[:, -1, :]
+            y_batch = y_batch[:, -1, :]
+        loss_fn = nn.MSELoss(reduction="sum")
         batch_loss = loss_fn(y_pred, y_batch)
         assert not batch_loss.isnan().any()
         total_loss += batch_loss.item()
-        num_samples += 1
+        batch_size = X_batch.size()[0]
+        num_samples += batch_size
     return total_loss, num_samples
 
-def eval_rmse(dataloader, loss_fn):
+def eval_rmse(dataloader):
     assert not model.training
-    total_loss, num_samples = total_mse(dataloader, loss_fn)
+    total_loss, num_samples = total_mse(dataloader, False)
     error = rmse(total_loss, num_samples)
     just_final = 737
     if not LAST:
-        total_loss, num_samples = total_mse_just_final(dataloader, loss_fn)
+        total_loss, num_samples = total_mse(dataloader, True)
         just_final = rmse(total_loss, num_samples)
     return error, just_final
 
@@ -112,12 +100,12 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
     grandUnifiedData, windows, normalization_params = read_entire_pickle()
-    subjects = grandUnifiedData.keys()
-    #subjects = ['AB01', 'AB02']
+    #subjects = grandUnifiedData.keys()
+    subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
-    activities = re.compile(".");
-    #activities = re.compile("normal_walk_1_0-6"); # smaller dataset
+    #activities = re.compile(".");
+    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
@@ -199,14 +187,14 @@ if __name__ == '__main__':
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 #'loss': loss
-                }, checkpoint_path)
+                }, "saved_model." + (epoch + 1) + ".ckpt")
             last_save_time = time.time()
         if time.time() > last_eval_time + 0 or epoch % 50 == 0: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
-                train_rmse, train_rmse_just_final = eval_rmse(train_dataloader, loss_fn)
-                test_rmse, test_rmse_just_final = eval_rmse(test_dataloader, loss_fn)
+                train_rmse, train_rmse_just_final = eval_rmse(train_dataloader)
+                test_rmse, test_rmse_just_final = eval_rmse(test_dataloader)
                 print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
                 print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
             last_eval_time = time.time()

@@ -33,7 +33,7 @@ $(GUD):
 
 $(GUD_NORMAL).tmp: $(GUD)
 	# normalize moments by kg
-	$(PYTHON3) normalize_moments.py $< $@.tmp
+	$(PYTHON3) normalize_moments.py $< $@
 
 $(GUD_NORMAL): $(GUD_NORMAL).tmp
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
