@@ -20,7 +20,7 @@ def get_window(grandUnifiedData, s, a, i):
     # I don't think pytorch accepts anything besides tensors
     sample_df, label_df = window[sensor_list], window[output_list]
     if LAST:
-        label_df = label_df[:, -1, :]
+        label_df = label_df[-1, :]
     # pytorch by default expects float32, not float64 which seems to be the numpy default
     sample_t, label_t = torch.tensor(sample_df.to_numpy(dtype=np.float32)), torch.tensor(label_df.to_numpy(dtype=np.float32))
     # these asserts should be redudant, since we should've filtered out any
