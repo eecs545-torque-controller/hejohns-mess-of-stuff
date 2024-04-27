@@ -52,9 +52,10 @@ class GreedyGrandLSTMDataset(Dataset):
         windows = filter_windows(windows, subjects, activities)
         print(f"filter_windows finished at {curtime()}")
         print(f"starting to get_window ... {curtime()}")
-        with Pool(processes=min(len(os.sched_getaffinity(0)), 8)) as pool:
+        nproc = min(len(os.sched_getaffinity(0)), 8)
+        with Pool(processes=nproc) as pool:
             #self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
-            self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
+            self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows, chunk_size=len(windows) / nproc)
         print(f"get_window finished at {curtime()}", flush=True)
         # NOTE: drop all the data we're using, since no other datasets should be using it
         # as a memory optimization (the test dataset doesn't need the entire dateset, only what's left)
