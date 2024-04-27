@@ -58,6 +58,7 @@ def total_mse(dataloader, just_final):
     assert num_samples == dataloader.dataset.__len__()
     return total_loss, num_samples
 
+# TODO: just_final is stupid as hell and needs to get fixed
 def eval_rmse(dataloader):
     assert not model.training
     total_loss, num_samples = total_mse(dataloader, False)
