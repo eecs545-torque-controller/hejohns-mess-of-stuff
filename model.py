@@ -38,37 +38,80 @@ class LSTMModel(nn.Module):
             x = x[:, -1, :]
         return x
 
-def total_mse(dataloader, just_final):
-    assert not model.training
+# my brain needs to see these as globals
+if __name__ == '__main__':
+    # gpu stuff
+    print(f"Running on {device}")
+    # basic initialization
+    model = LSTMModel()
+    model = nn.DataParallel(model)
+    model = model.to(device, non_blocking=True)
+    optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
+    loss_fn = nn.MSELoss() # taken from the paper
+
+# for y_lamba
+def drop_for_just_final(y_pred, y_batch):
+    y_pred = y_pred[:, -1, :]
+    y_batch = y_batch[:, -1, :]
+    return y_pred, y_batch
+
+def loop_over_data(
+        dataloader,
+        loss_fn,
+        batch_loss_lambda=lambda bl, _: bl,
+        y_lambda=lambda x, y: (x, y),
+        optimizer=None
+        ):
     total_loss = 0.0
     num_samples = 0
+    num_elements = 0
     for X_batch, y_batch in dataloader:
         X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
         y_pred = model(X_batch)
         assert not y_pred.isnan().any()
-        if just_final:
-            y_pred = y_pred[:, -1, :]
-            y_batch = y_batch[:, -1, :]
-        loss_fn = nn.MSELoss(reduction="sum")
+
+        y_pred, y_batch= y_lambda(y_pred, y_batch)
         batch_loss = loss_fn(y_pred, y_batch)
         assert not batch_loss.isnan().any()
-        total_loss += batch_loss.item()
-        batch_size = X_batch.size()[0]
-        num_samples += batch_size
-    assert num_samples == dataloader.dataset.__len__()
-    return total_loss, num_samples
 
-# TODO: just_final is stupid as hell and needs to get fixed
-def eval_rmse(dataloader):
+        if optimizer is not None:
+            optimizer.zero_grad() # this can go anywhere except for between backward and step
+            batch_loss.backward()
+            optimizer.step()
+
+        numel = y_batch.numel()
+        batch_loss = batch_loss.sum().item()
+        batch_loss = batch_loss_lambda(batch_loss, numel)
+        total_loss += batch_loss # sum of a singleton is id
+        num_samples += X_batch.size()[0] # batch_size
+        num_elements += numel
+    assert num_samples == dataloader.dataset.__len__()
+    return total_loss, num_elements
+
+# How MSELoss is calculated, which we'll have to do by hand over the batches
+# https://discuss.pytorch.org/t/how-is-the-mseloss-implemented/12972/4
+# https://discuss.pytorch.org/t/custom-loss-functions/29387/2
+
+# just_final means that we only consider the moments at the last timestamp
+def total_mse(dataloader, just_final):
     assert not model.training
-    total_loss, num_samples = total_mse(dataloader, False)
-    # TODO: discrepancy between how pytorch calculates MSE and how we do
-    error = rmse(total_loss, num_samples)
-    just_final = 737
-    if not LAST:
-        total_loss, num_samples = total_mse(dataloader, True)
-        just_final = rmse(total_loss, num_samples)
-    return error, just_final
+    # just_final is irrespective if LAST is set-- this WILL NOT WORK if LAST with just_final = True and LAST is already set
+    assert not (just_final and LAST)
+    total_loss, num_elements = 0.0, 0
+    if just_final:
+        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=drop_for_just_final)
+    else:
+        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=lambda x, y: (x, y))
+    return total_loss, num_elements
+
+def eval_rmse(dataloader, just_final):
+    assert not model.training
+    total_loss, num_elements = total_mse(dataloader, just_final)
+    error = rmse(total_loss, num_elements)
+    return error
+
+def rmse(total_loss, num_samples):
+    return np.sqrt(total_loss / num_samples)
 
 # https://stackoverflow.com/a/73704579
 class EarlyStop:
@@ -87,21 +130,10 @@ class EarlyStop:
                 return True
         return False
 
-def rmse(total_loss, num_samples):
-    return np.sqrt(total_loss / num_samples)
-
 # for local testing
 #torch.set_num_threads(48)
 
 if __name__ == '__main__':
-    # gpu stuff
-    print(f"Running on {device}")
-    # basic initialization
-    model = LSTMModel()
-    model = nn.DataParallel(model)
-    model = model.to(device, non_blocking=True)
-    optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
-    loss_fn = nn.MSELoss() # taken from the paper
     grandUnifiedData, windows, normalization_params = read_entire_pickle()
     #subjects = grandUnifiedData.keys()
     subjects = ['AB01', 'AB02']
@@ -124,8 +156,9 @@ if __name__ == '__main__':
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
     # NOTE: if we're using all the data
-    #assert num_total_windows == num_training_windows + num_test_windows
-    print()
+    if not num_total_windows == num_training_windows + num_test_windows:
+        print("!!!We must not be using all the data!!!")
+
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
@@ -156,32 +189,20 @@ if __name__ == '__main__':
     else:
         start_epoch = 0
         print(f"No checkpoint found since {os.path.isfile(checkpoint_path)} and {len(sys.argv) > 1}. Starting training from scratch.... {curtime()}")
+
     should_early_stop = EarlyStop() # taken from the paper
     last_save_time = time.time()
     last_eval_time = 0
     for epoch in range(start_epoch, n_epochs):
         print(f"epoch {epoch} at {curtime()}", flush=True)
         model.train()
-        total_training_loss = 0.0 # sum of losses of all batches
-        num_samples = 0 # number of total samples trained on
-        for X_batch, y_batch in train_dataloader:
-            X_batch, y_batch = X_batch.to(device, non_blocking=True), y_batch.to(device, non_blocking=True)
-            y_pred = model(X_batch) # happens on gpu
-            # TODO:
-            # I don't know pytorch/python/gpus enough, but this assert may
-            # cause the tensor to shuttle back to the cpu memory
-            assert not y_pred.isnan().any()
-            # take the loss wrt the true moments at each timestamp in the window
-            loss = loss_fn(y_pred, y_batch)
-            assert not loss.isnan().any()
-            optimizer.zero_grad() # this can go anywhere except for between backward and step
-            loss.backward()
-            optimizer.step()
-            # on cpu, but should be fast
-            batch_size = X_batch.size()[0]
-            total_training_loss += loss.item() * batch_size
-            num_samples += batch_size
-            #print(f"after batch {curtime()}")
+        total_training_loss, num_elements = loop_over_data(
+                train_dataloader,
+                loss_fn=loss_fn,
+                batch_loss_lambda=lambda bl, numel: bl * numel,
+                y_lambda=lambda x, y: (x, y),
+                optimizer=optimizer
+                )
         # save checkpoint
         #print(f"saving model at {curtime()}")
         if time.time() > last_save_time + 300:
@@ -196,10 +217,17 @@ if __name__ == '__main__':
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
-                train_rmse, train_rmse_just_final = eval_rmse(train_dataloader)
-                test_rmse, test_rmse_just_final = eval_rmse(test_dataloader)
-                print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
-                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
+                if LAST:
+                    train_rmse = total_training_loss / num_elements
+                    test_rmse = eval_rmse(test_dataloader, False)
+                    print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, test_rmse))
+                else:
+                    train_rmse = total_training_loss / num_elements
+                    train_rmse_just_final = eval_rmse(train_dataloader, True)
+                    test_rmse = eval_rmse(test_dataloader, False)
+                    test_rmse_just_final = eval_rmse(test_dataloader, True)
+                    print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
+                    print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
             last_eval_time = time.time()
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
