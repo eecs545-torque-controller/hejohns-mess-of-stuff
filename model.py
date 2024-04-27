@@ -55,11 +55,13 @@ def total_mse(dataloader, just_final):
         total_loss += batch_loss.item()
         batch_size = X_batch.size()[0]
         num_samples += batch_size
+    assert num_samples == dataloader.dataset.__len__()
     return total_loss, num_samples
 
 def eval_rmse(dataloader):
     assert not model.training
     total_loss, num_samples = total_mse(dataloader, False)
+    # TODO: discrepancy between how pytorch calculates MSE and how we do
     error = rmse(total_loss, num_samples)
     just_final = 737
     if not LAST:
