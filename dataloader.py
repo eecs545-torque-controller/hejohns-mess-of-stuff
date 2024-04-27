@@ -21,7 +21,7 @@ def get_window(grandUnifiedData, s, a, i):
     sample_df, label_df = window[sensor_list], window[output_list]
     if LAST:
         # we could do this with [-1, :] after converting to a tensor, but let's do it even before it gets there
-        label_df = label_df.loc[label_df.index[-1]]
+        label_df = label_df.loc[label_df.index[-1]].squeeze()
     # pytorch by default expects float32, not float64 which seems to be the numpy default
     sample_t, label_t = torch.tensor(sample_df.to_numpy(dtype=np.float32)), torch.tensor(label_df.to_numpy(dtype=np.float32))
     # these asserts should be redudant, since we should've filtered out any
