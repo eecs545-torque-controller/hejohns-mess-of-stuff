@@ -162,7 +162,7 @@ if __name__ == '__main__':
     # NOTE: if we're using all the data
     if not num_total_windows == num_training_windows + num_test_windows:
         print("!!!We must not be using all the data!!!")
-        assert TEST
+        assert DEBUG
 
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
