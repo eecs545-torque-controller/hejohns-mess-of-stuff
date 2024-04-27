@@ -54,6 +54,8 @@ class GreedyGrandLSTMDataset(Dataset):
         print(f"starting to get_window ... {curtime()}")
         self.unused_data = {}
         if len(windows) > 1000000:
+            nproc = min(len(os.sched_getaffinity(0)), 8)
+            print(f"Using multithreaded get_window with {nproc} threads")
             # serializing grandUnifiedData is REALLY slow, so it only makes sense to do when the number of windows is very large
             ## first, let's try to cut down on size of grandUnifiedData
             for s in list(grandUnifiedData.keys()):
@@ -61,10 +63,10 @@ class GreedyGrandLSTMDataset(Dataset):
                     self.unused_data[s] = grandUnifiedData[s]
                     del grandUnifiedData[s]
             ## and now use multiprocess.map
-            nproc = min(len(os.sched_getaffinity(0)), 8)
             with Pool(processes=nproc) as pool:
                 self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
         else:
+            print("Using single-threaded get_window")
             self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
         print(f"get_window finished at {curtime()}", flush=True)
         # NOTE: drop all the data we're using, since no other datasets should be using it
