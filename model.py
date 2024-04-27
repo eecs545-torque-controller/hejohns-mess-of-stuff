@@ -112,12 +112,12 @@ if __name__ == '__main__':
     optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
     grandUnifiedData, windows, normalization_params = read_entire_pickle()
-    #subjects = data.keys()
-    subjects = ['AB01', 'AB02']
+    subjects = data.keys()
+    #subjects = ['AB01', 'AB02']
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
-    #activities = re.compile(".");
-    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
+    activities = re.compile(".");
+    #activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
