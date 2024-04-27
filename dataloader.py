@@ -58,7 +58,7 @@ class GreedyGrandLSTMDataset(Dataset):
             ## first, let's try to cut down on size of grandUnifiedData
             for s in grandUnifiedData.keys():
                 if s not in subjects:
-                    unused_data[s] = grandUnifiedData[s]
+                    self.unused_data[s] = grandUnifiedData[s]
                     del grandUnifiedData[s]
             ## and now use multiprocess.map
             nproc = min(len(os.sched_getaffinity(0)), 8)
