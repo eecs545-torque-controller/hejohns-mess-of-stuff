@@ -101,7 +101,9 @@ def curtime():
     return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
 
 # if we should only predict the moments at the last timestamp, or the entire window
-LAST = False if os.environ.get('WHOLE_WINDOW') else True
+LAST = False if os.environ.get("WHOLE_WINDOW") else True
+
+DEBUG = True if os.environ.get("DEBUG") else False
 
 if __name__ == '__main__':
     print("This file shouldn't be run directly")

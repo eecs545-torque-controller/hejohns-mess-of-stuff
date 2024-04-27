@@ -101,7 +101,7 @@ def total_mse(dataloader, just_final):
     if just_final:
         total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=drop_for_just_final)
     else:
-        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=lambda x, y: (x, y))
+        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"))
     return total_loss, num_elements
 
 def eval_rmse(dataloader, just_final):
@@ -135,12 +135,16 @@ class EarlyStop:
 
 if __name__ == '__main__':
     grandUnifiedData, windows, normalization_params = read_entire_pickle()
-    #subjects = grandUnifiedData.keys()
-    subjects = ['AB01', 'AB02']
+    if DEBUG:
+        subjects = ['AB01', 'AB02']
+    else:
+        subjects = grandUnifiedData.keys()
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
-    #activities = re.compile(".");
-    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
+    if DEBUG:
+        activities = re.compile("normal_walk_1_0-6"); # smaller dataset
+    else:
+        activities = re.compile(".");
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
@@ -158,6 +162,7 @@ if __name__ == '__main__':
     # NOTE: if we're using all the data
     if not num_total_windows == num_training_windows + num_test_windows:
         print("!!!We must not be using all the data!!!")
+        assert TEST
 
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
@@ -200,12 +205,11 @@ if __name__ == '__main__':
                 train_dataloader,
                 loss_fn=loss_fn,
                 batch_loss_lambda=lambda bl, numel: bl * numel,
-                y_lambda=lambda x, y: (x, y),
                 optimizer=optimizer
                 )
         # save checkpoint
         #print(f"saving model at {curtime()}")
-        if time.time() > last_save_time + 300:
+        if time.time() > last_save_time + 0:
             torch.save({
                 'epoch': epoch + 1,
                 'model_state_dict': model.state_dict(),
@@ -213,7 +217,7 @@ if __name__ == '__main__':
                 #'loss': loss
                 }, "saved_model." + str(epoch + 1) + ".ckpt")
             last_save_time = time.time()
-        if time.time() > last_eval_time + 0 or epoch % 50 == 0: # only eval every n epochs
+        if time.time() > last_eval_time + 0 or epoch % 5 == 0: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
             model.eval()
             with torch.no_grad():
