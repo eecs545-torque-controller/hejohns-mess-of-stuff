@@ -37,7 +37,8 @@ $(GUD_NORMAL).tmp: $(GUD)
 
 $(GUD_NORMAL): $(GUD_NORMAL).tmp
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
-	$(PYTHON3) normalize.py $(GUD_NORMAL).tmp $@
+	$(PYTHON3) normalize.py $< $@
+	rm $<
 	ls --human-readable --size $@
 
 ProcessedData.zip:
