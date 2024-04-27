@@ -187,7 +187,7 @@ if __name__ == '__main__':
                 'model_state_dict': model.state_dict(),
                 'optimizer_state_dict': optimizer.state_dict(),
                 #'loss': loss
-                }, "saved_model." + (epoch + 1) + ".ckpt")
+                }, "saved_model." + str(epoch + 1) + ".ckpt")
             last_save_time = time.time()
         if time.time() > last_eval_time + 0 or epoch % 50 == 0: # only eval every n epochs
         #if epoch % 10 == 0: # only eval every n epochs
