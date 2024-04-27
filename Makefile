@@ -29,7 +29,7 @@ $(GUD):
 	# single file pickle of data and window indices
 	$(MAKE) preprocessed_data
 	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
-	ls --human-readable --size $@
+	du -h $@
 
 $(GUD_NORMAL).tmp: $(GUD)
 	# normalize moments by kg
@@ -39,7 +39,7 @@ $(GUD_NORMAL): $(GUD_NORMAL).tmp
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
 	$(PYTHON3) normalize.py $< $@
 	rm $<
-	ls --human-readable --size $@
+	du -h $@
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
