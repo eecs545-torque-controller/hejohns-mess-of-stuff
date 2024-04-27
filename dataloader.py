@@ -53,7 +53,7 @@ class GreedyGrandLSTMDataset(Dataset):
         print(f"filter_windows finished at {curtime()}")
         print(f"starting to get_window ... {curtime()}")
         self.unused_data = {}
-        if len(windows) > 0: # for testing
+        if len(windows) > 1000000:
             # serializing grandUnifiedData is REALLY slow, so it only makes sense to do when the number of windows is very large
             ## first, let's try to cut down on size of grandUnifiedData
             for s in list(grandUnifiedData.keys()):
