@@ -117,7 +117,7 @@ if __name__ == '__main__':
     test_subjects = ['AB01']
     training_subjects = [s for s in subjects if s not in test_subjects]
     #activities = re.compile(".");
-    activities = re.compile("normal_walk"); # smaller dataset
+    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
