@@ -126,7 +126,8 @@ if __name__ == '__main__':
     print(f"done initializing training dataset... {curtime()}")
     print(f"initializing test dataset... {curtime()}")
     # NOTE: training and test data should never overlap, so we can reuse the dict and list
-    grandUnifiedData = training_data.unused_data
+    if training_data.unused_data:
+        grandUnifiedData = training_data.unused_data
     test_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
     del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
     num_test_windows = test_data.__len__()
