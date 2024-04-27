@@ -4,6 +4,7 @@ import torch
 import datetime
 import pytz
 import pickle
+import os
 
 # TODO: check this again
 sensor_list = [
@@ -100,7 +101,7 @@ def curtime():
     return datetime.datetime.now(tz=pytz.timezone('US/Eastern')).time()
 
 # if we should only predict the moments at the last timestamp, or the entire window
-LAST = True
+LAST = False if os.environ.get('WHOLE_WINDOW') else True
 
 if __name__ == '__main__':
     print("This file shouldn't be run directly")
