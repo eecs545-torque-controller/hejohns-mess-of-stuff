@@ -63,7 +63,7 @@ class GreedyGrandLSTMDataset(Dataset):
             ## and now use multiprocess.map
             nproc = min(len(os.sched_getaffinity(0)), 8)
             with Pool(processes=nproc) as pool:
-                self.windows = pool.map_async((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
+                self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
         else:
             self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
         print(f"get_window finished at {curtime()}", flush=True)
