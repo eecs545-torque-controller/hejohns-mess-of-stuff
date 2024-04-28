@@ -12,6 +12,7 @@ GUD_NORMAL = GrandUnifiedData_normalized.pickle
 # but the normal target will always build preprocessed_data since it's phony
 default:
 	[ -e $(GUD_NORMAL) ] || (wget -O $(GUD_NORMAL) todo && md5sum --status --strict -w -c checksums) || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
+	$(MAKE) check_data.txt
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
