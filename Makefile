@@ -8,7 +8,7 @@ GUD = GrandUnifiedData.50.pickle
 GUD100 = GrandUnifiedData.100.pickle
 # and a normalized version, with column-wise mean and std dev as well
 GUD_NORMAL = GrandUnifiedData_normalized.50.pickle
-GUD_NORMAL100 = GrandUnifiedData_normalized.50.pickle
+GUD_NORMAL100 = GrandUnifiedData_normalized.100.pickle
 
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
