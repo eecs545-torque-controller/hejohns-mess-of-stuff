@@ -27,4 +27,5 @@ def check(filepath):
     print("--------------------")
     
 check("GrandUnifiedData.pickle")
+print("====================")
 check("GrandUnifiedData_normalized.pickle")
