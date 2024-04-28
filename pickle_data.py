@@ -24,9 +24,8 @@ for s in subjects:
         # get dataframe for this [subject][activity]
         leaf = os.path.join(os.getcwd(), s, a, sys.argv[1])
         assert os.path.isfile(leaf)
-        df = pandas.read_csv(leaf, index_col="time")
         # only keep what we need
-        df = df[sensor_list + output_list]
+        df = pandas.read_csv(leaf, index_col="time", usecols=(sensor_list + output_list))
         # https://stackoverflow.com/a/69188251
         df[df.select_dtypes(np.float64).columns] = df.select_dtypes(np.float64).astype(np.float32)
         grandUnifiedData[s][a] = df
