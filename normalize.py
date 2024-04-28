@@ -10,7 +10,7 @@ def normalize_data(grandUnifiedData):
     columnwise_count = {}
     columnwise_std = {}
     # I'd like to use columnwise pandas.DataFrame.sum, but this relies less on column order
-    for c in sensor_list + output_list:
+    for c in sensor_list:
         columnwise_sum[c] = 0
         columnwise_count[c] = 0
         column_acc = []
