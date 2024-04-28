@@ -39,8 +39,9 @@ $(GUD_NORMAL): $(GUD)
 	$(PYTHON3) normalize.py $< $@
 	du -h $@
 
-$(GUD_NORMAL100): $(GUD_NORMAL)
-	$(PYTHON3) recalc_window.py $< $@
+$(GUD_NORMAL100):
+	[ -e $(GUD_NORMAL) ] || $(MAKE) $(GUD_NORMAL)
+	$(PYTHON3) recalc_window.py $(GUD_NORMAL) $@
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download
