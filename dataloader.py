@@ -44,7 +44,7 @@ class GrandLSTMDataset(Dataset):
         return get_window(self.grandUnifiedData, s, a, i)
 
 # precompute all windows and try to fit them all in memory
-# NOTE: requires ~46G memory on full dataset, ~2G on just one subject, norm_walk*
+# NOTE: requires ~64G memory on full dataset, ~2G on just one subject, norm_walk*
 class GreedyGrandLSTMDataset(Dataset):
     def __init__(self, pickled_data, subjects, activities):
         grandUnifiedData, windows = pickled_data

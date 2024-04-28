@@ -4,9 +4,11 @@ PERL = perl -Mv5.32 -Mutf8 -Mstrict -Mwarnings '-MFile::Slurp qw(read_dir)' -MFi
 PYTHON3 = python3
 
 # a pickle of all the data and window indices, for storage in memory during training
-GUD = GrandUnifiedData.pickle
+GUD = GrandUnifiedData.50.pickle
+GUD100 = GrandUnifiedData.100.pickle
 # and a normalized version, with column-wise mean and std dev as well
-GUD_NORMAL = GrandUnifiedData_normalized.pickle
+GUD_NORMAL = GrandUnifiedData_normalized.50.pickle
+GUD_NORMAL100 = GrandUnifiedData_normalized.50.pickle
 
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
@@ -36,6 +38,9 @@ $(GUD_NORMAL): $(GUD)
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
 	$(PYTHON3) normalize.py $< $@
 	du -h $@
+
+$(GUD_NORMAL100): $(GUD_NORMAL)
+	$(PYTHON3) recalc_window.py $< $@
 
 ProcessedData.zip:
 	wget -O $@ https://repository.gatech.edu/bitstreams/03f9679f-28ce-4d8b-b195-4b3b1aa4adc9/download

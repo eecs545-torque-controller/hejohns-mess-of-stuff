@@ -81,15 +81,19 @@ output_list = [
 
 batch_size = 64
 
-window_size = 50
-
-checkpoint_path = 'saved_model.ckpt'
+# this should really be part of the binary data of the data pickle file,
+# but I don't want to recompute 50 yet again and change the order
+window_size_re = re.compile("\.(\d+)\.pickle$")
+def get_window_size(grandUnifiedDataPath):
+    window_size = int(window_size_re.search(grandUnifiedDataPath).group(1))
+    print(f"Using a window_size of {window_size}")
+    return window_size
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 n_epochs = 4000 # taken from the paper
 
-def read_entire_pickle(filepath="GrandUnifiedData_normalized.pickle"):
+def read_entire_pickle(filepath):
     with open(filepath, 'rb') as f:
         grandUnifiedData, windows, *normalization_params = pickle.load(f)
     return grandUnifiedData, windows, normalization_params
@@ -105,6 +109,8 @@ def curtime():
 LAST = False if os.environ.get("WHOLE_WINDOW") else True
 
 DEBUG = True if os.environ.get("DEBUG") else False
+
+SCHEDULER = True if os.environ.get("SCHEDULER") else False
 
 if __name__ == '__main__':
     print("This file shouldn't be run directly")

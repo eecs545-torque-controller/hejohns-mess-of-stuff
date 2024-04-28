@@ -42,12 +42,55 @@ class LSTMModel(nn.Module):
 if __name__ == '__main__':
     # gpu stuff
     print(f"Running on {device}")
+    # args
+    assert len(sys.argv) > 1
+    window_size = get_window_size(sys.argv[1])
+    grandUnifiedData, windows, normalization_params = read_entire_pickle(sys.argv[1])
     # basic initialization
     model = LSTMModel()
     model = nn.DataParallel(model)
     model = model.to(device, non_blocking=True)
-    optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
+    if SCHEDULER:
+        optimizer = optim.Adam(model.parameters(), lr=0.0001)
+        scheduler = optim.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
+    else:
+        optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
+
+    if DEBUG:
+        subjects = ['AB01', 'AB02']
+    else:
+        subjects = grandUnifiedData.keys()
+    test_subjects = ['AB01']
+    training_subjects = [s for s in subjects if s not in test_subjects]
+    if DEBUG:
+        activities = re.compile("normal_walk_1_0-6"); # smaller dataset
+    else:
+        activities = re.compile(".");
+    print(f"initializing training dataset... {curtime()}")
+    # error checking
+    num_total_windows = len(windows)
+    if window_size > 50:
+        training_data = dataloader.GrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
+    else:
+        training_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
+    num_training_windows = training_data.__len__()
+    print(f"done initializing training dataset... {curtime()}")
+    print(f"initializing test dataset... {curtime()}")
+    if window_size > 50:
+        test_data = dataloader.GrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
+    else:
+        # NOTE: training and test data should never overlap, so we can reuse the dict and list
+        if training_data.unused_data:
+            grandUnifiedData = training_data.unused_data
+        test_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
+        del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
+    num_test_windows = test_data.__len__()
+    print(f"done initializing test dataset... {curtime()}")
+    # NOTE: if we're using all the data
+    if not num_total_windows == num_training_windows + num_test_windows:
+        print("!!!We must not be using all the data!!!")
+        assert DEBUG
 
 # for y_lamba
 def drop_for_just_final(y_pred, y_batch):
@@ -134,36 +177,6 @@ class EarlyStop:
 #torch.set_num_threads(48)
 
 if __name__ == '__main__':
-    grandUnifiedData, windows, normalization_params = read_entire_pickle()
-    if DEBUG:
-        subjects = ['AB01', 'AB02']
-    else:
-        subjects = grandUnifiedData.keys()
-    test_subjects = ['AB01']
-    training_subjects = [s for s in subjects if s not in test_subjects]
-    if DEBUG:
-        activities = re.compile("normal_walk_1_0-6"); # smaller dataset
-    else:
-        activities = re.compile(".");
-    print(f"initializing training dataset... {curtime()}")
-    # error checking
-    num_total_windows = len(windows)
-    training_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
-    num_training_windows = training_data.__len__()
-    print(f"done initializing training dataset... {curtime()}")
-    print(f"initializing test dataset... {curtime()}")
-    # NOTE: training and test data should never overlap, so we can reuse the dict and list
-    if training_data.unused_data:
-        grandUnifiedData = training_data.unused_data
-    test_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
-    del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
-    num_test_windows = test_data.__len__()
-    print(f"done initializing test dataset... {curtime()}")
-    # NOTE: if we're using all the data
-    if not num_total_windows == num_training_windows + num_test_windows:
-        print("!!!We must not be using all the data!!!")
-        assert DEBUG
-
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
@@ -184,20 +197,19 @@ if __name__ == '__main__':
             #persistent_workers=(device == "cuda"),
             )
 
-    if os.path.isfile(checkpoint_path) and len(sys.argv) > 1:
-        checkpoint = torch.load(checkpoint_path)
+    if len(sys.argv) > 2 and os.path.isfile(sys.argv[2]):
+        checkpoint = torch.load(sys.argv[2])
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
         start_epoch = checkpoint['epoch']
         #loss = checkpoint['loss']
-        print(f"Checkpoint loaded. Resuming training from epoch {start_epoch}... {curtime()}")
+        print(f"Checkpoint {sys.argv[1]} loaded. Resuming training from epoch {start_epoch}... {curtime()}")
     else:
         start_epoch = 0
-        print(f"No checkpoint found since {os.path.isfile(checkpoint_path)} and {len(sys.argv) > 1}. Starting training from scratch.... {curtime()}")
+        print(f"No checkpoint found since {len(sys.argv) > 2} and {os.path.isfile(sys.argv[2])}.")
+        print(f"Starting training from scratch.... {curtime()}")
 
     should_early_stop = EarlyStop() # taken from the paper
-    last_save_time = time.time()
-    last_eval_time = 0
     for epoch in range(start_epoch, n_epochs):
         print(f"epoch {epoch} at {curtime()}", flush=True)
         model.train()
@@ -207,32 +219,35 @@ if __name__ == '__main__':
                 batch_loss_lambda=lambda bl, numel: bl * numel,
                 optimizer=optimizer
                 )
-        # save checkpoint
-        #print(f"saving model at {curtime()}")
-        if time.time() > last_save_time + 0:
-            torch.save({
-                'epoch': epoch + 1,
-                'model_state_dict': model.state_dict(),
-                'optimizer_state_dict': optimizer.state_dict(),
-                #'loss': loss
-                }, "saved_model." + str(epoch + 1) + ".ckpt")
-            last_save_time = time.time()
-        if time.time() > last_eval_time + 0 or epoch % 5 == 0: # only eval every n epochs
-        #if epoch % 10 == 0: # only eval every n epochs
-            model.eval()
-            with torch.no_grad():
-                if LAST:
-                    train_rmse = total_training_loss / num_elements
-                    test_rmse = eval_rmse(test_dataloader, False)
-                    print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, test_rmse))
-                else:
-                    train_rmse = total_training_loss / num_elements
-                    train_rmse_just_final = eval_rmse(train_dataloader, True)
-                    test_rmse = eval_rmse(test_dataloader, False)
-                    test_rmse_just_final = eval_rmse(test_dataloader, True)
-                    print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
-                    print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
-            last_eval_time = time.time()
+        # save checkpoint every epoch
+
+        torch.save({
+            'epoch': epoch + 1,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            #'loss': loss
+            }, "saved_model." + str(epoch + 1) + ".ckpt")
+
+        # eval every epoch
+        model.eval()
+        with torch.no_grad():
+            if LAST:
+                train_rmse = total_training_loss / num_elements
+                test_rmse = eval_rmse(test_dataloader, False)
+                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, test_rmse))
+                eval_rmse = train_rmse # uh we're not using validation so...
+            else:
+                train_rmse = total_training_loss / num_elements
+                train_rmse_just_final = eval_rmse(train_dataloader, True)
+                test_rmse = eval_rmse(test_dataloader, False)
+                test_rmse_just_final = eval_rmse(test_dataloader, True)
+                print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
+                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
+                eval_rmse = train_rmse_just_final
+            if SCHEDULER:
+                scheduler.step(eval_rmse)
+                print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()))
+
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
             break

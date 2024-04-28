@@ -13,6 +13,7 @@ import numpy as np
 from config import *
 
 assert len(sys.argv) == 3
+window_size = get_window_size(sys.argv[2])
 subjects = [f for f in os.listdir(os.getcwd()) if re.search("^AB\d+$", f)]
 activities_re = re.compile(".")
 grandUnifiedData = {}
