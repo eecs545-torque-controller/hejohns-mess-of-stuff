@@ -19,7 +19,8 @@ def check(filepath):
     for s in dataset.grandUnifiedData.keys():
         for a in dataset.grandUnifiedData[s].keys():
             print(f"{s}/{a}")
-            print(dataset.grandUnifiedData[s][a])
+            with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
+                print(dataset.grandUnifiedData[s][a])
     print("--------------------")
     for w in dataset.windows:
         print(w)
