@@ -11,7 +11,7 @@ GUD_NORMAL = GrandUnifiedData_normalized.pickle
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD_NORMAL) ] || (wget -O $(GUD_NORMAL) https://tempestj.ddns.net/s/pXejSc5F3ad3JNf/download && md5sum --status --strict -w -c checksums) || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
+	[ -e $(GUD_NORMAL) ] || (wget -O $(GUD_NORMAL) todo && md5sum --status --strict -w -c checksums) || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
 
 # ideally these would be separate targets but...
 preprocessed_data: ProcessedData.zip
@@ -31,14 +31,9 @@ $(GUD):
 	$(PYTHON3) pickle_data.py preprocessed_data.csv $@
 	du -h $@
 
-$(GUD_NORMAL).tmp: $(GUD)
-	# normalize moments by kg
-	$(PYTHON3) normalize_moments.py $< $@
-
-$(GUD_NORMAL): $(GUD_NORMAL).tmp
+$(GUD_NORMAL): $(GUD)
 	# single file pickle of normalized data, window indices, and column-wise sum counts and std dev
 	$(PYTHON3) normalize.py $< $@
-	rm $<
 	du -h $@
 
 ProcessedData.zip:

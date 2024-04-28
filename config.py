@@ -69,13 +69,14 @@ sensor_list = [
         'hip_rotation_velocity_r',
         'knee_velocity_r',
         'ankle_velocity_r',
-        'subtalar_velocity_r',
+#        'subtalar_velocity_r',
         ]
 
 output_list = [
         'knee_angle_l_moment',
         'ankle_angle_l_moment',
-        'subtalar_angle_l_moment',
+# NOTE: NOT USING THIS
+#        'subtalar_angle_l_moment',
         ]
 
 batch_size = 64
