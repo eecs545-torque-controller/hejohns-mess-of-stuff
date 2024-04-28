@@ -5,6 +5,7 @@ import datetime
 import pytz
 import pickle
 import os
+import re
 
 # TODO: check this again
 sensor_list = [
