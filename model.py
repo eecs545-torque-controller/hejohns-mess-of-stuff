@@ -17,7 +17,7 @@ from config import *
 import dataloader
 
 class LSTMModel(nn.Module):
-    def __init__(self, hidden_size=512, num_layers=2):
+    def __init__(self, hidden_size=256, num_layers=4):
         super().__init__()
         self.input_size = len(sensor_list)
         self.hidden_size = hidden_size
