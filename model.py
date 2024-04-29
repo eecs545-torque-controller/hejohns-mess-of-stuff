@@ -52,7 +52,7 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     if SCHEDULER:
         optimizer = optim.Adam(model.parameters(), lr=0.0001)
-        scheduler = optim.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
     else:
         optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
@@ -180,21 +180,22 @@ if __name__ == '__main__':
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
+    use_workers = device == "cuda" and window_size > 50
     train_dataloader = torch.utils.data.DataLoader(
             training_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            #num_workers=(2 if device == "cuda" else 0),
-            #persistent_workers=(device == "cuda"),
+            num_workers=(4 if use_workers else 0),
+            persistent_workers=use_workers,
             )
     test_dataloader = torch.utils.data.DataLoader(
             test_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            #num_workers=(2 if device == "cuda" else 0),
-            #persistent_workers=(device == "cuda"),
+            num_workers=(2 if use_workers else 0),
+            persistent_workers=use_workers,
             )
 
     if len(sys.argv) > 2 and os.path.isfile(sys.argv[2]):
@@ -226,7 +227,7 @@ if __name__ == '__main__':
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             #'loss': loss
-            }, "saved_model." + str(epoch + 1) + ".ckpt")
+            }, "saved_model." + f"{window_size}." + str(epoch + 1) + ".ckpt")
 
         # eval every epoch
         model.eval()
@@ -246,7 +247,7 @@ if __name__ == '__main__':
                 val_rmse = train_rmse_just_final
             if SCHEDULER:
                 scheduler.step(val_rmse)
-                print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()))
+                print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()[0]))
 
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
