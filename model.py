@@ -206,7 +206,7 @@ if __name__ == '__main__':
         print(f"Checkpoint {sys.argv[1]} loaded. Resuming training from epoch {start_epoch}... {curtime()}")
     else:
         start_epoch = 0
-        print(f"No checkpoint found since {len(sys.argv) > 2} and {os.path.isfile(sys.argv[2])}.")
+        print(f"No checkpoint found since {len(sys.argv) > 2}.")
         print(f"Starting training from scratch.... {curtime()}")
 
     should_early_stop = EarlyStop() # taken from the paper
