@@ -52,7 +52,7 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     if SCHEDULER:
         optimizer = optim.Adam(model.parameters(), lr=0.0001)
-        scheduler = optim.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
     else:
         optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
@@ -246,7 +246,7 @@ if __name__ == '__main__':
                 val_rmse = train_rmse_just_final
             if SCHEDULER:
                 scheduler.step(val_rmse)
-                print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()))
+                print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()[0]))
 
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
