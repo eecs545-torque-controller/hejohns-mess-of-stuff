@@ -15,7 +15,7 @@ def filter_windows(windows, subjects, activities):
     # any windows that are for other subjects or activities
     return [(s, a, i) for s, a, i in windows if s in subjects and activities.search(a)]
 
-def get_window(grandUnifiedData, s, a, i):
+def get_window(window_size, grandUnifiedData, s, a, i):
     window = grandUnifiedData[s][a].iloc[i : i + window_size]
     # I don't think pytorch accepts anything besides tensors
     sample_df, label_df = window[sensor_list], window[output_list]
@@ -32,7 +32,8 @@ def get_window(grandUnifiedData, s, a, i):
 
 # our pytorch data loader
 class GrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
+    def __init__(self, window_size, pickled_data, subjects, activities):
+        self.window_size = window_size
         self.grandUnifiedData, windows = pickled_data
         print(f"starting to filter_windows... {curtime()}")
         self.windows = filter_windows(windows, subjects, activities)
@@ -41,12 +42,12 @@ class GrandLSTMDataset(Dataset):
         return len(self.windows)
     def __getitem__(self, idx):
         s, a, i = self.windows[idx]
-        return get_window(self.grandUnifiedData, s, a, i)
+        return get_window(self.window_size, self.grandUnifiedData, s, a, i)
 
 # precompute all windows and try to fit them all in memory
 # NOTE: requires ~64G memory on full dataset, ~2G on just one subject, norm_walk*
 class GreedyGrandLSTMDataset(Dataset):
-    def __init__(self, pickled_data, subjects, activities):
+    def __init__(self, window_size, pickled_data, subjects, activities):
         grandUnifiedData, windows = pickled_data
         print(f"starting to filter_windows... {curtime()}")
         windows = filter_windows(windows, subjects, activities)
@@ -64,10 +65,10 @@ class GreedyGrandLSTMDataset(Dataset):
                     del grandUnifiedData[s]
             ## and now use multiprocess.map
             with Pool(processes=nproc) as pool:
-                self.windows = pool.map((lambda t: get_window(grandUnifiedData, t[0], t[1], t[2])), windows)
+                self.windows = pool.map((lambda t: get_window(window_size, grandUnifiedData, t[0], t[1], t[2])), windows)
         else:
             print("Using single-threaded get_window")
-            self.windows = [get_window(grandUnifiedData, s, a, i) for s, a, i in windows]
+            self.windows = [get_window(window_size, grandUnifiedData, s, a, i) for s, a, i in windows]
         print(f"get_window finished at {curtime()}", flush=True)
         # NOTE: drop all the data we're using, since no other datasets should be using it
         # as a memory optimization (the test dataset doesn't need the entire dateset, only what's left)

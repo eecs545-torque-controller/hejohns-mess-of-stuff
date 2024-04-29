@@ -71,19 +71,19 @@ if __name__ == '__main__':
     # error checking
     num_total_windows = len(windows)
     if window_size > 50:
-        training_data = dataloader.GrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
+        training_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), training_subjects, activities)
     else:
-        training_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), training_subjects, activities)
+        training_data = dataloader.GreedyGrandLSTMDataset(window_size, (grandUnifiedData, windows), training_subjects, activities)
     num_training_windows = training_data.__len__()
     print(f"done initializing training dataset... {curtime()}")
     print(f"initializing test dataset... {curtime()}")
     if window_size > 50:
-        test_data = dataloader.GrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
+        test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
     else:
         # NOTE: training and test data should never overlap, so we can reuse the dict and list
         if training_data.unused_data:
             grandUnifiedData = training_data.unused_data
-        test_data = dataloader.GreedyGrandLSTMDataset((grandUnifiedData, windows), test_subjects, activities)
+        test_data = dataloader.GreedyGrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
         del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
@@ -235,7 +235,7 @@ if __name__ == '__main__':
                 train_rmse = total_training_loss / num_elements
                 test_rmse = eval_rmse(test_dataloader, False)
                 print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, test_rmse))
-                eval_rmse = train_rmse # uh we're not using validation so...
+                val_rmse = train_rmse # uh we're not using validation so...
             else:
                 train_rmse = total_training_loss / num_elements
                 train_rmse_just_final = eval_rmse(train_dataloader, True)
@@ -243,9 +243,9 @@ if __name__ == '__main__':
                 test_rmse_just_final = eval_rmse(test_dataloader, True)
                 print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
                 print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
-                eval_rmse = train_rmse_just_final
+                val_rmse = train_rmse_just_final
             if SCHEDULER:
-                scheduler.step(eval_rmse)
+                scheduler.step(val_rmse)
                 print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()))
 
         if should_early_stop.should_early_stop(total_training_loss):
