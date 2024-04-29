@@ -227,7 +227,7 @@ if __name__ == '__main__':
             'model_state_dict': model.state_dict(),
             'optimizer_state_dict': optimizer.state_dict(),
             #'loss': loss
-            }, "saved_model." + str(epoch + 1) + ".ckpt")
+            }, "saved_model." + f"{window_size}." + str(epoch + 1) + ".ckpt")
 
         # eval every epoch
         model.eval()
