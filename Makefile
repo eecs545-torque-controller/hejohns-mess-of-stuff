@@ -9,6 +9,7 @@ GUD = GrandUnifiedData.50.pickle
 GUD_NORMAL = GrandUnifiedData_normalized.50.pickle
 GUD_NORMAL100 = GrandUnifiedData_normalized.100.pickle
 GUD_NORMAL200 = GrandUnifiedData_normalized.200.pickle
+GUD_NORMAL400 = GrandUnifiedData_normalized.400.pickle
 
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
@@ -48,6 +49,10 @@ $(GUD_NORMAL100):
 	$(PYTHON3) recalc_window.py $(GUD_NORMAL) $@
 
 $(GUD_NORMAL200):
+	[ -e $(GUD_NORMAL) ] || $(MAKE) $(GUD_NORMAL)
+	$(PYTHON3) recalc_window.py $(GUD_NORMAL) $@
+
+$(GUD_NORMAL400):
 	[ -e $(GUD_NORMAL) ] || $(MAKE) $(GUD_NORMAL)
 	$(PYTHON3) recalc_window.py $(GUD_NORMAL) $@
 
