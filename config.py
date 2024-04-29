@@ -9,68 +9,94 @@ import re
 
 # TODO: check this again
 sensor_list = [
-        'hip_flexion_l',
-        'hip_adduction_l',
-        'hip_rotation_l',
+        'hip_flexion_l', # good
+        #'hip_adduction_l', # unused?
+        #'hip_rotation_l', # unused?
 
-        'hip_flexion_r',
-        'hip_adduction_r',
-        'hip_rotation_r',
+        'hip_flexion_r', # good
+        #'hip_adduction_r', # unused?
+        #'hip_rotation_r', # unused?
 
-        'knee_angle_r',
-        'ankle_angle_r',
-        'subtalar_angle_r',
+        'knee_angle_r', # good
+        'ankle_angle_r', # good
+        #'subtalar_angle_r', # unused?
 
-        'LTA',
-        'RTA',
-        'LRF',
-        'RRF',
-        'LBF',
-        'RBF',
-        'LGMED',
-        'RGMED',
+        #'LTA', # unused?
+        'RTA', # good
+        'LRF', # good
+        'RRF', # good
+        'LBF', # good
+        'RBF', # good
+        'LGMED', # good
+        'RGMED', # good
         'LMGAS',
-        'RMGAS',
-        'LVL',
-        'RVL',
-        'LGRAC',
-        'RGRAC',
-        'LGMAX',
-        'RGMAX',
-        'RShank_ACCX',
-        'RShank_ACCY',
-        'RShank_ACCZ',
-        'RShank_GYROX',
-        'RShank_GYROY',
-        'RShank_GYROZ',
-        'RAThigh_ACCX',
-        'RAThigh_ACCY',
-        'RAThigh_ACCZ',
-        'RAThigh_GYROX',
-        'RAThigh_GYROY',
-        'RAThigh_GYROZ',
-        'RPThigh_ACCX',
-        'RPThigh_ACCY',
-        'RPThigh_ACCZ',
-        'RPThigh_GYROX',
-        'RPThigh_GYROY',
-        'RPThigh_GYROZ',
-        'RPelvis_ACCX',
-        'RPelvis_ACCY',
-        'RPelvis_ACCZ',
-        'RPelvis_GYROX',
-        'RPelvis_GYROY',
-        'RPelvis_GYROZ',
-        'hip_flexion_velocity_l',
-        'hip_adduction_velocity_l',
-        'hip_rotation_velocity_l',
+        'RMGAS', # good
+        'LVL', # good
+        'RVL', # good
+        'LGRAC', # good
+        'RGRAC', # good
+        'LGMAX', # good
+        'RGMAX', # good
 
-        'hip_flexion_velocity_r',
-        'hip_adduction_velocity_r',
-        'hip_rotation_velocity_r',
-        'knee_velocity_r',
-        'ankle_velocity_r',
-#        'subtalar_velocity_r',
+        'RShank_ACCX', # good
+        'RShank_ACCY', # good
+        'RShank_ACCZ', # good
+        'RShank_GYROX', # good
+        'RShank_GYROY', # good
+        'RShank_GYROZ', # good
+
+        'RAThigh_ACCX', # good
+        'RAThigh_ACCY', # good
+        'RAThigh_ACCZ', # good
+        'RAThigh_GYROX', # good
+        'RAThigh_GYROY', # good
+        'RAThigh_GYROZ', # good
+
+        'RPThigh_ACCX', # good
+        'RPThigh_ACCY', # good
+        'RPThigh_ACCZ', # good
+        'RPThigh_GYROX', # good
+        'RPThigh_GYROY', # good
+        'RPThigh_GYROZ', # good
+
+        'LAThigh_ACCX', # good
+        'LAThigh_ACCY', # good
+        'LAThigh_ACCZ', # good
+        'LAThigh_GYROX', # good
+        'LAThigh_GYROY', # good
+        'LAThigh_GYROZ', # good
+
+        'LPThigh_ACCX', # good
+        'LPThigh_ACCY', # good
+        'LPThigh_ACCZ', # good
+        'LPThigh_GYROX', # good
+        'LPThigh_GYROY', # good
+        'LPThigh_GYROZ', # good
+
+        'LPelvis_ACCX', # good
+        'LPelvis_ACCY', # good
+        'LPelvis_ACCZ', # good
+        'LPelvis_GYROX', # good
+        'LPelvis_GYROY', # good
+        'LPelvis_GYROZ', # good
+
+        'RPelvis_ACCX', # good
+        'RPelvis_ACCY', # good
+        'RPelvis_ACCZ', # good
+        'RPelvis_GYROX', # good
+        'RPelvis_GYROY', # good
+        'RPelvis_GYROZ', # good
+
+        'hip_flexion_velocity_l', # good
+        #'hip_adduction_velocity_l',
+        #'hip_rotation_velocity_l',
+
+        'hip_flexion_velocity_r', # good
+        #'hip_adduction_velocity_r',
+        #'hip_rotation_velocity_r',
+        'knee_velocity_r', # good
+        'ankle_velocity_r', # good
+        #'subtalar_velocity_r', # unused
         ]
 
 output_list = [

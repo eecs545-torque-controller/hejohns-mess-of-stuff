@@ -13,7 +13,7 @@ GUD_NORMAL200 = GrandUnifiedData_normalized.200.pickle
 # hack, but we don't want to rebuild $(GUD) if it already exists,
 # but the normal target will always build preprocessed_data since it's phony
 default:
-	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) https://tempestj.ddns.net/s/CLfXEDkzNRXY87C/download || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
+	[ -e $(GUD_NORMAL) ] || wget -O $(GUD_NORMAL) todo || (rm $(GUD_NORMAL) && $(MAKE) $(GUD_NORMAL))
 	[ -e $(GUD_NORMAL100) ] || wget -O $(GUD_NORMAL100) todo || (rm $(GUD_NORMAL100) && $(MAKE) $(GUD_NORMAL100))
 	[ -e $(GUD_NORMAL200) ] || wget -O $(GUD_NORMAL200) todo || (rm $(GUD_NORMAL200) && $(MAKE) $(GUD_NORMAL200))
 	# this should fail if we build everything afresh
