@@ -17,7 +17,7 @@ from config import *
 import dataloader
 
 class LSTMModel(nn.Module):
-    def __init__(self, hidden_size=256, num_layers=4):
+    def __init__(self, hidden_size=64, num_layers=4):
         super().__init__()
         self.input_size = len(sensor_list)
         self.hidden_size = hidden_size
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     model = model.to(device, non_blocking=True)
     if SCHEDULER:
         optimizer = optim.Adam(model.parameters(), lr=0.0001)
-        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", threshold=0.00001)
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     else:
         optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
@@ -272,9 +272,13 @@ if __name__ == '__main__':
             if SCHEDULER:
                 scheduler.step(val_rmse)
                 print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()[0]))
+                if scheduler.get_last_lr()[0] < .000001:
+                    print(f" Training rate too low on epoch {epoch}")
+                    break
 
         # TODO: this should really be validation, but we're not really using it anyways
-        if should_early_stop.should_early_stop(total_training_loss):
-            print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
+        # I've temporarily made it the val_rmse
+        if should_early_stop.should_early_stop(val_rmse):
+            print(f"Stopping early on epoch {epoch}")
             break
     print(f"Finished Training at {curtime()}", flush=True)
