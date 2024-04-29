@@ -45,6 +45,8 @@ if __name__ == '__main__':
     # args
     assert len(sys.argv) > 1
     window_size = get_window_size(sys.argv[1])
+    use_greedy = window_size <= 50
+    print(f"use_greedy is {use_greedy}")
     grandUnifiedData, windows, normalization_params = read_entire_pickle(sys.argv[1])
     # basic initialization
     model = LSTMModel()
@@ -58,11 +60,12 @@ if __name__ == '__main__':
     loss_fn = nn.MSELoss() # taken from the paper
 
     if DEBUG:
-        subjects = ['AB01', 'AB02']
+        subjects = ['AB01', 'AB02', 'AB05']
     else:
         subjects = grandUnifiedData.keys()
     test_subjects = ['AB01']
-    training_subjects = [s for s in subjects if s not in test_subjects]
+    validation_subjects = ['AB05']
+    training_subjects = [s for s in subjects if s not in test_subjects and s not in validation_subjects]
     if DEBUG:
         activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     else:
@@ -70,25 +73,35 @@ if __name__ == '__main__':
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
-    if window_size > 50:
-        training_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), training_subjects, activities)
-    else:
+    if use_greedy:
         training_data = dataloader.GreedyGrandLSTMDataset(window_size, (grandUnifiedData, windows), training_subjects, activities)
+    else:
+        training_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), training_subjects, activities)
     num_training_windows = training_data.__len__()
     print(f"done initializing training dataset... {curtime()}")
-    print(f"initializing test dataset... {curtime()}")
-    if window_size > 50:
-        test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
-    else:
-        # NOTE: training and test data should never overlap, so we can reuse the dict and list
+    print(f"initializing validation dataset... {curtime()}")
+    if use_greedy:
+        # NOTE: training, validation, and test data should never overlap, so we can reuse the dict and list
         if training_data.unused_data:
             grandUnifiedData = training_data.unused_data
+        validation_data = dataloader.GreedyGrandLSTMDataset(window_size, (grandUnifiedData, windows), validation_subjects, activities)
+    else:
+        validation_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), validation_subjects, activities)
+    num_validation_windows = validation_data.__len__()
+    print(f"done initializing validation dataset... {curtime()}")
+    print(f"initializing test dataset... {curtime()}")
+    if use_greedy:
+        # NOTE: training, validation, and test data should never overlap, so we can reuse the dict and list
+        if validation_data.unused_data:
+            grandUnifiedData = validation_data.unused_data
         test_data = dataloader.GreedyGrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
         del grandUnifiedData # drop the reference, if it's the last one (eg using GreedyGrandLSTMDataset)
+    else:
+        test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
     num_test_windows = test_data.__len__()
     print(f"done initializing test dataset... {curtime()}")
     # NOTE: if we're using all the data
-    if not num_total_windows == num_training_windows + num_test_windows:
+    if not num_total_windows == num_training_windows + num_validation_windows + num_test_windows:
         print("!!!We must not be using all the data!!!")
         assert DEBUG
 
@@ -180,13 +193,21 @@ if __name__ == '__main__':
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
-    use_workers = device == "cuda" and window_size > 50
+    use_workers = device == "cuda" and use_greedy
     train_dataloader = torch.utils.data.DataLoader(
             training_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
             num_workers=(4 if use_workers else 0),
+            persistent_workers=use_workers,
+            )
+    validation_dataloader = torch.utils.data.DataLoader(
+            validation_data,
+            shuffle=True,
+            batch_size=batch_size,
+            pin_memory=(device == "cuda"),
+            num_workers=(2 if use_workers else 0),
             persistent_workers=use_workers,
             )
     test_dataloader = torch.utils.data.DataLoader(
@@ -234,21 +255,25 @@ if __name__ == '__main__':
         with torch.no_grad():
             if LAST:
                 train_rmse = total_training_loss / num_elements
+                validation_rmse = eval_rmse(validation_dataloader, False)
                 test_rmse = eval_rmse(test_dataloader, False)
-                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, test_rmse))
-                val_rmse = train_rmse # uh we're not using validation so...
+                print("Epoch %d: final timestamp: train RMSE %.4f, validation RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse, validation_rmse, test_rmse))
+                val_rmse = validation_rmse
             else:
                 train_rmse = total_training_loss / num_elements
                 train_rmse_just_final = eval_rmse(train_dataloader, True)
+                validation_rmse = eval_rmse(validation_dataloader, False)
+                validation_rmse_just_final = eval_rmse(validation_dataloader, True)
                 test_rmse = eval_rmse(test_dataloader, False)
                 test_rmse_just_final = eval_rmse(test_dataloader, True)
-                print("Epoch %d: whole window: train RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, test_rmse))
-                print("Epoch %d: final timestamp: train RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, test_rmse_just_final))
-                val_rmse = train_rmse_just_final
+                print("Epoch %d: whole window: train RMSE %.4f, validation RMSE %.4f, test RMSE %.4f" % (epoch, train_rmse, validation_rmse, test_rmse))
+                print("Epoch %d: final timestamp: train RMSE %.4f, validation RMSE %.4f, test RMSE %.4f"% (epoch, train_rmse_just_final, validation_rmse, test_rmse_just_final))
+                val_rmse = validation_rmse_just_final
             if SCHEDULER:
                 scheduler.step(val_rmse)
                 print("Current scheduler learning rate for epoch %d is %.4f" % (epoch, scheduler.get_last_lr()[0]))
 
+        # TODO: this should really be validation, but we're not really using it anyways
         if should_early_stop.should_early_stop(total_training_loss):
             print(f"Stopping early on epoch {epoch}, with training RMSE %.4f ... {curtime()}", rmse(total_training_loss, num_samples))
             break

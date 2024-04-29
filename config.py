@@ -8,6 +8,7 @@ import os
 import re
 
 # TODO: check this again
+# NOTE: Checked against Nikko's picture
 sensor_list = [
         'hip_flexion_l', # good
         #'hip_adduction_l', # unused?
