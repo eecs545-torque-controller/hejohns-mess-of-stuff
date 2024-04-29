@@ -180,21 +180,22 @@ if __name__ == '__main__':
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
+    use_workers = device == "cuda" and window_size > 50
     train_dataloader = torch.utils.data.DataLoader(
             training_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            #num_workers=(2 if device == "cuda" else 0),
-            #persistent_workers=(device == "cuda"),
+            num_workers=(4 if use_workers else 0),
+            persistent_workers=use_workers,
             )
     test_dataloader = torch.utils.data.DataLoader(
             test_data,
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            #num_workers=(2 if device == "cuda" else 0),
-            #persistent_workers=(device == "cuda"),
+            num_workers=(2 if use_workers else 0),
+            persistent_workers=use_workers,
             )
 
     if len(sys.argv) > 2 and os.path.isfile(sys.argv[2]):
