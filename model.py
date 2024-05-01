@@ -199,7 +199,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(4 if use_workers else 0),
+            num_workers=(8 if use_workers else 0),
             persistent_workers=use_workers,
             )
     validation_dataloader = torch.utils.data.DataLoader(
@@ -207,7 +207,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(2 if use_workers else 0),
+            num_workers=(4 if use_workers else 0),
             persistent_workers=use_workers,
             )
     test_dataloader = torch.utils.data.DataLoader(
@@ -215,7 +215,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(2 if use_workers else 0),
+            num_workers=(4 if use_workers else 0),
             persistent_workers=use_workers,
             )
 
