@@ -45,7 +45,7 @@ if __name__ == '__main__':
     # args
     assert len(sys.argv) > 1
     window_size = get_window_size(sys.argv[1])
-    use_greedy = window_size <= 50
+    use_greedy = window_size < 50
     print(f"use_greedy is {use_greedy}")
     grandUnifiedData, windows, normalization_params = read_entire_pickle(sys.argv[1])
     # basic initialization
@@ -193,7 +193,7 @@ if __name__ == '__main__':
     # I'm pretty sure prefetching is useless if we're doing CPU training
     # unless the disk IO is really slow, but I'm hoping for gpu we can make
     # better use of both resources
-    use_workers = device == "cuda" and use_greedy
+    use_workers = device == "cuda" and not use_greedy
     train_dataloader = torch.utils.data.DataLoader(
             training_data,
             shuffle=True,

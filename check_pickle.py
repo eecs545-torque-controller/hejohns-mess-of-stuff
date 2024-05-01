@@ -9,7 +9,7 @@ from config import *
 from dataloader import *
 
 def check(filepath):
-    grandUnifiedData, windows, *normalization_params = read_entire_pickle(filepath=filepath)
+    grandUnifiedData, windows, *normalization_params = read_entire_pickle(filepath=sys.argv[1])
     print(f"has {len(windows)} windows")
     print("normalization_params: ", normalization_params)
     subjects = grandUnifiedData.keys()
@@ -19,8 +19,7 @@ def check(filepath):
     for s in dataset.grandUnifiedData.keys():
         for a in dataset.grandUnifiedData[s].keys():
             print(f"{s}/{a}")
-            with pandas.option_context('display.max_rows', None, 'display.max_columns', None):
-                print(dataset.grandUnifiedData[s][a])
+            print(dataset.grandUnifiedData[s][a])
     print("--------------------")
     for w in dataset.windows:
         print(w)
