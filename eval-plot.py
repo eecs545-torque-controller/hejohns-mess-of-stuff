@@ -33,36 +33,30 @@ if __name__ == '__main__':
     #if DEBUG:
     #    subjects = ['AB01', 'AB02', 'AB05']
     #else:
-    test_subjects = ['AB01']
+    test_subjects = ['AB05']
     #if DEBUG:
     #    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     #else:
-    activities = re.compile(".");
+    #activities = re.compile("normal_walk_1_2-5");
+    activities = re.compile("normal_walk_1_shuffle");
     test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
-    test_dataloader = torch.utils.data.DataLoader(
-            test_data,
-            shuffle=True,
-            batch_size=batch_size,
-            num_workers=32,
-            persistent_workers=True,
-            )
     assert len(sys.argv) > 2 and os.path.isfile(sys.argv[2])
     checkpoint = torch.load(sys.argv[2], map_location=device)
     model.load_state_dict(checkpoint['model_state_dict'])
 
-def joint_total_mse(dataloader, joint):
-    assert not model.training
-    total_loss, num_elements = loop_over_data(model, dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=lambda y_pred, y_batch: (y_pred[:,joint], y_batch[:,joint]))
-    return total_loss, num_elements
-
-def joint_eval_rmse(dataloader, joint):
-    assert not model.training
-    total_loss, num_elements = joint_total_mse(dataloader, joint)
-    return rmse(total_loss, num_elements)
-
 if __name__ == '__main__':
     model.eval()
+    print(f",timestep,knee,ankle")
     with torch.no_grad():
-        for i in range(len(output_list)):
-            joint_rmse = joint_eval_rmse(test_dataloader, i)
-            print(f"{output_list[i]} {joint_rmse}")
+        # in a rush-- let's just copy and paste loop_over_data
+        for (s, a, j) in test_data.windows:
+            file = s + "/" + a + "/" + "preprocessed_data.csv"
+            df = pandas.read_csv(file, index_col="time")
+            df = df.iloc[j:j + window_size]
+            df = df[sensor_list]
+            dft = torch.tensor(df.to_numpy(dtype=np.float32)).unsqueeze(0)
+            y_pred = model(dft)
+            assert not y_pred.isnan().any()
+            y_pred = y_pred.squeeze()
+            # TODO: uhhhh j + window_size ?
+            print(f"{j + window_size},{df.index.values[-1]},{y_pred[0]},{y_pred[1]}")
