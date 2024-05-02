@@ -38,7 +38,7 @@ if __name__ == '__main__':
     #    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     #else:
     #activities = re.compile("normal_walk_1_2-5");
-    activities = re.compile("normal_walk_1_1-2");
+    activities = re.compile("tug_of_war_1");
     test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
     assert len(sys.argv) > 2 and os.path.isfile(sys.argv[2])
     checkpoint = torch.load(sys.argv[2], map_location=device)
