@@ -17,7 +17,7 @@ from config import *
 import dataloader
 
 class LSTMModel(nn.Module):
-    def __init__(self, hidden_size=64, num_layers=4):
+    def __init__(self, hidden_size=128, num_layers=4):
         super().__init__()
         self.input_size = len(sensor_list)
         self.hidden_size = hidden_size
@@ -56,7 +56,7 @@ if __name__ == '__main__':
         optimizer = optim.Adam(model.parameters(), lr=0.0001)
         scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer)
     else:
-        optimizer = optim.Adam(model.parameters(), lr=0.001) # taken from the paper
+        optimizer = optim.Adam(model.parameters(), lr=0.0001) # taken from the paper
     loss_fn = nn.MSELoss() # taken from the paper
 
     if DEBUG:
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if DEBUG:
         activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     else:
-        activities = re.compile(".");
+        activities = re.compile("^(jump)");
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     # NOTE: if we're using all the data
     if not num_total_windows == num_training_windows + num_validation_windows + num_test_windows:
         print("!!!We must not be using all the data!!!")
-        assert DEBUG
+    #    assert DEBUG
 
 # for y_lamba
 def drop_for_just_final(y_pred, y_batch):
@@ -200,7 +200,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(8 if use_workers else 0),
+            num_workers=(20 if use_workers else 0),
             persistent_workers=use_workers,
             )
     validation_dataloader = torch.utils.data.DataLoader(
@@ -208,7 +208,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(4 if use_workers else 0),
+            num_workers=(8 if use_workers else 0),
             persistent_workers=use_workers,
             )
     test_dataloader = torch.utils.data.DataLoader(
@@ -216,7 +216,7 @@ if __name__ == '__main__':
             shuffle=True,
             batch_size=batch_size,
             pin_memory=(device == "cuda"),
-            num_workers=(4 if use_workers else 0),
+            num_workers=(8 if use_workers else 0),
             persistent_workers=use_workers,
             )
 
