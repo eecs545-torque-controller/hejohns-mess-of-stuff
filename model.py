@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if DEBUG:
         activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     else:
-        activities = re.compile("^(jump)");
+        activities = re.compile("^((?!jump).)*$");
     print(f"initializing training dataset... {curtime()}")
     # error checking
     num_total_windows = len(windows)

@@ -37,8 +37,8 @@ if __name__ == '__main__':
     #if DEBUG:
     #    activities = re.compile("normal_walk_1_0-6"); # smaller dataset
     #else:
-    #activities = re.compile("normal_walk_1_2-5");
-    activities = re.compile("normal_walk_1_shuffle");
+    activities = re.compile(".");
+    #activities = re.compile("normal_walk_1_shuffle");
     test_data = dataloader.GrandLSTMDataset(window_size, (grandUnifiedData, windows), test_subjects, activities)
     test_dataloader = torch.utils.data.DataLoader(
             test_data,
