@@ -112,11 +112,12 @@ def drop_for_just_final(y_pred, y_batch):
     return y_pred, y_batch
 
 def loop_over_data(
+        model,
         dataloader,
         loss_fn,
         batch_loss_lambda=lambda bl, _: bl,
         y_lambda=lambda x, y: (x, y),
-        optimizer=None
+        optimizer=None,
         ):
     total_loss = 0.0
     num_samples = 0
@@ -155,9 +156,9 @@ def total_mse(dataloader, just_final):
     assert not (just_final and LAST)
     total_loss, num_elements = 0.0, 0
     if just_final:
-        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=drop_for_just_final)
+        total_loss, num_elements = loop_over_data(model, dataloader, loss_fn=nn.MSELoss(reduction="none"), y_lambda=drop_for_just_final)
     else:
-        total_loss, num_elements = loop_over_data(dataloader, loss_fn=nn.MSELoss(reduction="none"))
+        total_loss, num_elements = loop_over_data(model, dataloader, loss_fn=nn.MSELoss(reduction="none"))
     return total_loss, num_elements
 
 def eval_rmse(dataloader, just_final):
@@ -236,6 +237,7 @@ if __name__ == '__main__':
         print(f"epoch {epoch} at {curtime()}", flush=True)
         model.train()
         total_training_loss, num_elements = loop_over_data(
+                model,
                 train_dataloader,
                 loss_fn=loss_fn,
                 batch_loss_lambda=lambda bl, numel: bl * numel,
